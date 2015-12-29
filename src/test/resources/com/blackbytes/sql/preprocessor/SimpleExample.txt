@@ -1,0 +1,80 @@
+package com.example.com;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.function.Function;
+
+public class SimpleExample {
+
+	private static final String SQL = String.join(
+		System.lineSeparator(),
+		"SELECT * FROM users WHERE name = ?;"
+	);
+
+	@FunctionalInterface
+	public interface ResultSetHandler<T> {
+		T handle(ResultSet results) throws SQLException;
+	}
+
+	public interface NeedsName {
+		ReadyToExecute withName(String name) throws SQLException;
+	}
+
+	public interface ReadyToExecute {
+		int execute() throws SQLException;
+		<T> T execute(ResultSetHandler<T> handler) throws SQLException;
+	}
+
+	private static class Prepared implements NeedsName, ReadyToExecute {
+
+		private final PreparedStatement statement;
+
+		public Prepared(Connection connection) throws SQLException {
+			statement = connection.prepareStatement(SQL);
+		}
+
+		@Override
+		public ReadyToExecute withName(String name) throws SQLException {
+			statement.setObject(1, name, Types.VARCHAR);
+			return this;
+		}
+
+		@Override
+		public int execute() throws SQLException {
+			int totalUpdateCount = 0;
+			while (true) {
+				if (statement.execute()) {
+					continue;
+				}
+				int updateCount = statement.getUpdateCount();
+				if (updateCount < 0) {
+					return totalUpdateCount;
+				}
+				totalUpdateCount += updateCount;
+			}
+		}
+
+		@Override
+		public <T> T execute(ResultSetHandler<T> handler) throws SQLException {
+			boolean isResultSet = statement.execute();
+			do {
+				if (isResultSet) {
+					try (final ResultSet results = statement.getResultSet()) {
+						return handler.handle(results);
+					}
+				}
+				isResultSet = statement.getMoreResults();
+			} while (isResultSet || statement.getUpdateCount() != -1);
+			throw new IllegalArgumentException("Statement does not return any results!");
+		}
+
+	}
+
+	public static NeedsName using(Connection connection) throws SQLException {
+		return new Prepared(connection);
+	}
+
+}
