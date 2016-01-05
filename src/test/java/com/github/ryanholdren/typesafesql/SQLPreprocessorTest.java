@@ -1,15 +1,16 @@
-package com.blackbytes.typesafesql;
+package com.github.ryanholdren.typesafesql;
 
-import com.blackbytes.typesafesql.SQLPreprocessor;
-import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class SQLPreprocessorTest {
+
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	@Test
 	public void test() throws IOException {
@@ -28,13 +29,21 @@ public class SQLPreprocessorTest {
 	}
 
 	private String getResourceAsString(String name) throws IOException {
+		final char[] buffer = new char[1024];
+		final StringBuilder result = new StringBuilder();
 		try (
-			final InputStream input = getClass().getResourceAsStream(name);
-		) {
-			final byte[] bytes = ByteStreams.toByteArray(input);
-			final String string = new String(bytes, Charset.defaultCharset());
-			return string;
+			final InputStream input = getClass().getResourceAsStream(name);) {
+			try (final InputStreamReader reader = new InputStreamReader(input, UTF8)) {
+				while (true) {
+					int charactersRead = reader.read(buffer, 0, buffer.length);
+					if (charactersRead < 0) {
+						break;
+					}
+					result.append(buffer, 0, charactersRead);
+				}
+			}
 		}
+		return result.toString();
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.blackbytes.typesafesql;
+package com.github.ryanholdren.typesafesql;
 
 import java.io.File;
 import java.io.IOException;

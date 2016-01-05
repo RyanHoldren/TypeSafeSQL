@@ -1,4 +1,4 @@
-package com.blackbytes.typesafesql;
+package com.github.ryanholdren.typesafesql;
 
 import java.util.HashSet;
 
