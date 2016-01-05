@@ -1,15 +1,15 @@
-package com.blackbytes.sql.preprocessor;
+package com.blackbytes.typesafesql;
 
 import java.util.HashSet;
 
 public class SQLParameter {
 
-	private final String type;
+	private final SQLParameterType type;
 	private final String nameInUpperCamelCase;
 	private final String nameInLowerCamelCase;
 	private final HashSet<Integer> positions = new HashSet<>();
 
-	public SQLParameter(String nameInLowerCamelCase, String type, int position) {
+	public SQLParameter(String nameInLowerCamelCase, SQLParameterType type, int position) {
 		this.nameInLowerCamelCase = nameInLowerCamelCase;
 		this.nameInUpperCamelCase = capitalize(nameInLowerCamelCase);
 		this.type = type;
@@ -20,7 +20,7 @@ public class SQLParameter {
 		positions.add(position);
 	}
 
-	public String getType() {
+	public SQLParameterType getType() {
 		return type;
 	}
 
@@ -34,21 +34,6 @@ public class SQLParameter {
 
 	public String getNameInLowerCamelCase() {
 		return nameInLowerCamelCase;
-	}
-
-	public String getNameOfJavaType() {
-		switch (type) {
-			case "VARCHAR":
-				return "String";
-			case "DOUBLE":
-				return "double";
-			case "INTEGER":
-				return "int";
-			case "VARBINARY":
-				return "byte[]";
-			default:
-				throw new UnsupportedOperationException();
-		}
 	}
 
 	private static String capitalize(String word) {

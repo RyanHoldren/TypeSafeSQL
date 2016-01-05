@@ -1,5 +1,6 @@
-package com.blackbytes.sql.preprocessor;
+package com.blackbytes.typesafesql;
 
+import com.blackbytes.typesafesql.SQLPreprocessor;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.InputStream;

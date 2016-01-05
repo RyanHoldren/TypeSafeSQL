@@ -1,4 +1,4 @@
-package com.blackbytes.sql.preprocessor;
+package com.blackbytes.typesafesql;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -9,7 +9,7 @@ public class SQLParameters implements Iterable<SQLParameter> {
 
 	private int position = 1;
 
-	public SQLParameter add(String name, String type) {
+	public SQLParameter add(String name, SQLParameterType type) {
 		try {
 			return parameters.compute(name, (existingName, existingParameter) -> {
 				if (existingParameter == null) {
