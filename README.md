@@ -8,7 +8,7 @@ The purpose of this Maven plugin is to automatically generate Java classes from 
 * No need to interact with JDBC directly.
 * Forgetting a parameter of a SQL script is compile-time error.
 * TypeSafeSQL will automatically close JDBC resources, such as [Connections](https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html), [PreparedStatements](https://docs.oracle.com/javase/7/docs/api/java/sql/PreparedStatement.html), [ResultSets](https://docs.oracle.com/javase/7/docs/api/java/sql/ResultSet.html).
-* Results of SELECT queries return type-safe [Java 8 Streams](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html). For example, if your query returns only one BIGINT column, the result of execute() will be a [LongStream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/LongStream.html). If your query returns two columns, one VARCHAR named "username" and one INTEGER named "age" the result will be a [Stream\<Result\>](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html) where Result is the following:
+* Results of SELECT queries return type-safe [Java 8 Streams](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html). For example, if your query returns only one BIGINT column, the result of execute() will be a [LongStream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/LongStream.html). If your query returns two columns, one VARCHAR named "username" and one INTEGER named "age" the result will be a [Stream\<Result\>](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html) where Result is an automatically generated class that looks like this:
 ```
 	public final class Result {
 
