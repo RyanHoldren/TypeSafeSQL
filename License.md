@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2016 Ryan Connor Holdren
+Copyright (c) 2016 Ryan Holdren
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
