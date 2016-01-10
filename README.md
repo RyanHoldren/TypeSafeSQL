@@ -1,4 +1,7 @@
 # TypeSafeSQL
+1. [Introduction](#introduction)
+2. [Example](#example)
+3. [Installation](#installation)
 
 ##Introduction
 The purpose of this Maven plugin is to automatically generate Java classes from (annotated) SQL files, providing the following benefits:
