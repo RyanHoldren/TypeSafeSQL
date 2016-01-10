@@ -3,11 +3,11 @@
 ##Introduction
 The purpose of this Maven plugin is to automatically generate Java classes from (annotated) SQL files, providing the following benefits:
 * No need to interact with JDBC directly.
-* Forgetting a parameter to a SQL script is compile-time error.
+* Forgetting a parameter of a SQL script is compile-time error.
 * TypeSafeSQL will automatically close JDBC resources, such as [Connections](https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html), [PreparedStatements](https://docs.oracle.com/javase/7/docs/api/java/sql/PreparedStatement.html), [ResultSets](https://docs.oracle.com/javase/7/docs/api/java/sql/ResultSet.html).
 * Results of SELECT queries return type-safe [Java 8 Streams](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html). For example, if your query returns only one BIGINT column, the result of execute() will be a [LongStream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/LongStream.html). If your query returns two columns, one VARCHAR named "username" and one INTEGER named "age" the result will be a [Stream\<Result\>](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html) where Result is the following:
 ```
-	public static final class Result {
+	public final class Result {
 
 		private final String username;
 		private final int age;
