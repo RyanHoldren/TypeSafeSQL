@@ -1,0 +1,1 @@
+SELECT {in:VARCHAR:firstInput} AS {out:VARCHAR:firstOutput}, {in:VARCHAR:secondInput} AS {out:VARCHAR:secondOutput};

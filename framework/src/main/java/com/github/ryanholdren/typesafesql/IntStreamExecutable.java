@@ -1,0 +1,44 @@
+package com.github.ryanholdren.typesafesql;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.IntConsumer;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
+
+public class IntStreamExecutable extends StreamExecutable<Integer, IntStream> {
+
+	public IntStreamExecutable(String sql, Connection connection, ConnectionHandling handling) {
+		super(sql, connection, handling);
+	}
+
+	@Override
+	protected final IntStream helpExecute(ResultSet results) {
+		return StreamSupport.intStream(
+			new Spliterators.AbstractIntSpliterator(
+				Long.MAX_VALUE,
+				Spliterator.ORDERED
+			) {
+				@Override
+				public boolean tryAdvance(IntConsumer action) {
+					try {
+						if (results.next()) {
+							final int value = results.getInt(1);
+							action.accept(value);
+							return true;
+						} else {
+							return false;
+						}
+					} catch (SQLException exception) {
+						throw new RuntimeSQLException(exception);
+					}
+				}
+			},
+			false
+		);
+	}
+
+}
