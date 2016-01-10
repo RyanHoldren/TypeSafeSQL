@@ -41,7 +41,7 @@ SELECT
 FROM
 	user
 WHERE
-	username = {VARCHAR:username};
+	username = {in:VARCHAR:username};
 ```
 Then during the build process TypeSafeSQL will automatically generate ```target/generated-sources/sql/com/example/project/LookupUser.java```, which you can use within your application to execute the SQL query in a type-safe manor:
 ```
