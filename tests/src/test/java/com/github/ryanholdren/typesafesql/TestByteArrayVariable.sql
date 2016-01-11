@@ -1,1 +1,0 @@
-SELECT {in:VARBINARY:input} AS {out:VARBINARY:output};

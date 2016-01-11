@@ -1,1 +1,0 @@
-SELECT {in:VARCHAR:input} AS {out:VARCHAR:output};

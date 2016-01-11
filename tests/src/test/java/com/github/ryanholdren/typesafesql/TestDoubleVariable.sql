@@ -1,1 +1,0 @@
-SELECT {in:DOUBLE:input} AS {out:DOUBLE:output};

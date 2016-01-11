@@ -48,8 +48,12 @@ public class SQLParameter {
 		return "Needs" + nameInUpperCamelCase;
 	}
 
-	public String getNameOfMethod() {
+	public String getNameOfWithMethod() {
 		return "with" + nameInUpperCamelCase;
+	}
+
+	public String getNameOfWithoutMethod() {
+		return "without" + nameInUpperCamelCase;
 	}
 
 }

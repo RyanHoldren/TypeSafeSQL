@@ -5,6 +5,11 @@ public enum SQLParameterType {
 	VARCHAR {
 
 		@Override
+		protected boolean canBeNull() {
+			return true;
+		}
+
+		@Override
 		public String getNameOfJavaType() {
 			return "String";
 		}
@@ -27,6 +32,11 @@ public enum SQLParameterType {
 	},
 
 	DOUBLE {
+
+		@Override
+		protected boolean canBeNull() {
+			return false;
+		}
 
 		@Override
 		public String getNameOfJavaType() {
@@ -53,6 +63,11 @@ public enum SQLParameterType {
 	INTEGER {
 
 		@Override
+		protected boolean canBeNull() {
+			return false;
+		}
+
+		@Override
 		public String getNameOfJavaType() {
 			return "int";
 		}
@@ -75,6 +90,11 @@ public enum SQLParameterType {
 	},
 
 	VARBINARY {
+
+		@Override
+		protected boolean canBeNull() {
+			return true;
+		}
 
 		@Override
 		public String getNameOfJavaType() {
@@ -101,6 +121,11 @@ public enum SQLParameterType {
 	BIGINT {
 
 		@Override
+		protected boolean canBeNull() {
+			return false;
+		}
+
+		@Override
 		public String getNameOfJavaType() {
 			return "long";
 		}
@@ -125,6 +150,11 @@ public enum SQLParameterType {
 	TIMESTAMP {
 
 		@Override
+		protected boolean canBeNull() {
+			return true;
+		}
+
+		@Override
 		public String getNameOfJavaType() {
 			return "Instant";
 		}
@@ -145,8 +175,8 @@ public enum SQLParameterType {
 		}
 
 		@Override
-		public String getGetter(int position, String nameOfVariable) {
-			return super.getGetter(position, nameOfVariable) + ".toInstant()";
+		public String getGetter(int position) {
+			return super.getGetter(position) + ".toInstant()";
 		}
 
 		@Override
@@ -156,17 +186,19 @@ public enum SQLParameterType {
 
 	};
 
+	protected abstract boolean canBeNull();
+	protected abstract String getNameOfMethodInPreparedStatement();
+	protected abstract String getNameOfMethodInResultSet();
+
 	public abstract String getNameOfJavaType();
-	public abstract String getNameOfMethodInPreparedStatement();
-	public abstract String getNameOfMethodInResultSet();
 	public abstract String getNameOfSingleParameterExecutor();
 
 	public String getSetter(int position, String nameOfVariable) {
 		return getNameOfMethodInPreparedStatement() + "(" + position + ", " + nameOfVariable + ")";
 	}
 
-	public String getGetter(int position, String nameOfVariable) {
-		return getNameOfMethodInPreparedStatement() + "(" + position + ", " + nameOfVariable + ")";
+	public String getGetter(int position) {
+		return getNameOfMethodInResultSet() + "(" + position + ")";
 	}
 
 }

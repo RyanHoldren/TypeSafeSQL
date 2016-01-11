@@ -261,7 +261,6 @@ public class SQLProcessor {
 		if (iterator.hasNext()) {
 			SQLParameter current = iterator.next();
 			do {
-				final String methodName = current.getNameOfMethod();
 				final String argumentName = current.getNameInLowerCamelCase();
 				final SQLParameterType type = current.getType();
 				final String argumentType = type.getNameOfJavaType();
@@ -275,7 +274,12 @@ public class SQLProcessor {
 					next = null;
 					returnType = getNameOfExecutorClass();
 				}
-				writeLine("		", returnType, " ", methodName, "(", argumentType, " ", argumentName, ");");
+				if (type.canBeNull() == false) {
+					final String withoutMethodName = current.getNameOfWithoutMethod();
+					writeLine("		", returnType, " ", withoutMethodName, "();");
+				}
+				final String withMethodName = current.getNameOfWithMethod();
+				writeLine("		", returnType, " ", withMethodName, "(", argumentType, " ", argumentName, ");");
 				writeLine("	}");
 				writeLine();
 				current = next;
@@ -313,7 +317,6 @@ public class SQLProcessor {
 			SQLParameter current = iterator.next();
 			SQLParameter next;
 			do {
-				writeLine("		@Override");
 				final String returnType;
 				if (iterator.hasNext()) {
 					next = iterator.next();
@@ -323,13 +326,39 @@ public class SQLProcessor {
 					returnType = getNameOfExecutorClass();
 				}
 				final String argumentName = current.getNameInLowerCamelCase();
-				final String methodName = current.getNameOfMethod();
+				final String withMethodName = current.getNameOfWithMethod();
 				final SQLParameterType type = current.getType();
 				final String argumentType = type.getNameOfJavaType();
-				writeLine("		public final ", returnType, " ", methodName, "(", argumentType, " ", argumentName, ") {");
+				if (type.canBeNull() == false) {
+					final String withoutMethodName = current.getNameOfWithoutMethod();
+					writeLine("		@Override");
+					writeLine("		public final ", returnType, " ", withoutMethodName, "() {");
+					writeLine("			return safelyUseStatement(statement -> {");
+					for (int position : current.getPositions()) {
+						writeLine("				statement.setNull(", position, ", Types." + type.name(), ");");
+					}
+					writeLine("				return this;");
+					writeLine("			});");
+					writeLine("		}");
+					writeLine();
+				}
+				writeLine("		@Override");
+				writeLine("		public final ", returnType, " ", withMethodName, "(", argumentType, " ", argumentName, ") {");
 				writeLine("			return safelyUseStatement(statement -> {");
-				for (int position : current.getPositions()) {
-					writeLine("				statement.", type.getSetter(position, argumentName), ";");
+				if (type.canBeNull()) {
+					writeLine("				if (", argumentName, " == null) {");
+					for (int position : current.getPositions()) {
+						writeLine("					statement.setNull(", position, ", Types." + type.name(), ");");
+					}
+					writeLine("				} else {");
+					for (int position : current.getPositions()) {
+						writeLine("					statement.", type.getSetter(position, argumentName), ";");
+					}
+					writeLine("				}");
+				} else {
+					for (int position : current.getPositions()) {
+						writeLine("					statement.", type.getSetter(position, argumentName), ";");
+					}
 				}
 				writeLine("				return this;");
 				writeLine("			});");
@@ -350,10 +379,10 @@ public class SQLProcessor {
 		for (SQLParameter column : columns) {
 			final SQLParameterType type = column.getType();
 			final String nameInLowerCamel = column.getNameInLowerCamelCase();
-			final String nameOfMethod = type.getNameOfMethodInResultSet();
 			final String nameOfType = type.getNameOfJavaType();
 			final int position = column.getPositions().iterator().next();
-			writeLine("			final ", nameOfType, " ", nameInLowerCamel, " = results.", nameOfMethod, "(", position, ");");
+			final String getter = type.getGetter(position);
+			writeLine("			final ", nameOfType, " ", nameInLowerCamel, " = results.", getter, ";");
 		}
 		writeLine("			return new Result(");
 		final Iterator<SQLParameter> columnIterator = columns.iterator();

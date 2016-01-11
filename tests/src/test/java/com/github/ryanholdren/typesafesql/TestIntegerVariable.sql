@@ -1,1 +1,0 @@
-SELECT {in:INTEGER:input} AS {out:INTEGER:output};

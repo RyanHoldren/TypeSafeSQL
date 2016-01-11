@@ -1,1 +1,0 @@
-SELECT {in:TIMESTAMP:input}::timestamptz AS {out:TIMESTAMP:output};

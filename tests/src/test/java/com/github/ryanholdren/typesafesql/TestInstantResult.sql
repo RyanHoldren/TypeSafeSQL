@@ -1,0 +1,1 @@
+SELECT TIMESTAMP with time zone '2004-10-19T10:23:54Z' AS {out:TIMESTAMP:output};
