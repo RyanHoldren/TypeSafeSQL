@@ -1,3 +1,5 @@
 /plugin/target/
 /tests/target/
 /framework/target/
+/target/
+nbactions.xml
