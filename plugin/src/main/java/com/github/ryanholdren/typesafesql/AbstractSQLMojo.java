@@ -53,8 +53,8 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 									.newBuilder()
 									.setNamespace(namespace)
 									.setClassName(className)
-									.setInput(sqlPath)
-									.setOutput(javaPath)
+									.setReader(sqlPath)
+									.setWriter(javaPath)
 									.preprocess();
 							} catch (IOException exception) {
 								throw new RuntimeException(exception);

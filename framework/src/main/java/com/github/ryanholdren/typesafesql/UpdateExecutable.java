@@ -14,16 +14,16 @@ public class UpdateExecutable extends Executable {
 			int totalUpdateCount = 0;
 			boolean isResultSet = statement.execute();
 			while (true) {
-				if (isResultSet) {
-					continue;
+				if (isResultSet == false) {
+					int updateCount = statement.getUpdateCount();
+					if (updateCount < 0) {
+						break;
+					}
+					totalUpdateCount += updateCount;
 				}
-				int updateCount = statement.getUpdateCount();
-				if (updateCount < 0) {
-					return totalUpdateCount;
-				}
-				totalUpdateCount += updateCount;
 				isResultSet = statement.getMoreResults();
 			}
+			return totalUpdateCount;
 		});
 		try {
 			close();

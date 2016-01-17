@@ -1,1 +1,1 @@
-CREATE TEMPORARY TABLE test AS SELECT {in:VARBINARY:input};
+SELECT ASSERT(decode('DEADBEEF', 'hex') = {in:VARBINARY:input});

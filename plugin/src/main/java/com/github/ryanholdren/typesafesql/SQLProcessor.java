@@ -1,12 +1,12 @@
 package com.github.ryanholdren.typesafesql;
 
+import com.github.ryanholdren.typesafesql.columns.ResultColumns;
+import com.github.ryanholdren.typesafesql.parameters.Parameter;
+import com.github.ryanholdren.typesafesql.parameters.Parameters;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,43 +20,33 @@ public class SQLProcessor {
 	public static class Builder {
 
 		private BufferedReader reader;
-		private BufferedWriter writer;
+		private AutoIndentingWriter writer;
 		private String className;
 		private String namespace;
 
-		public Builder setInput(Reader input) {
-			this.reader = new BufferedReader(input);
-			return this;
-		}
-
-		public Builder setInput(InputStream input) {
-			this.reader = new BufferedReader(new InputStreamReader(input));
-			return this;
-		}
-
-		public Builder setInput(Path file) throws IOException {
+		public Builder setReader(Path file) throws IOException {
 			this.reader = Files.newBufferedReader(file, UTF8);
 			return this;
 		}
 
-		public Builder setInput(BufferedReader input) {
+		public Builder setReader(BufferedReader input) {
 			this.reader = input;
 			return this;
 		}
 
-		public Builder setOutput(Writer output) {
-			this.writer = new BufferedWriter(output);
+		public Builder setReader(Reader input) {
+			this.reader = new BufferedReader(input);
 			return this;
 		}
 
-		public Builder setOutput(BufferedWriter output) {
-			this.writer = output;
-			return this;
-		}
-
-		public Builder setOutput(Path file) throws IOException {
+		public Builder setWriter(Path file) throws IOException {
 			Files.createDirectories(file.getParent());
-			this.writer = Files.newBufferedWriter(file, UTF8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			final BufferedWriter writer = Files.newBufferedWriter(file, UTF8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			return setWriter(writer);
+		}
+
+		public Builder setWriter(BufferedWriter output) {
+			this.writer = new AutoIndentingWriter(output);
 			return this;
 		}
 
@@ -71,7 +61,15 @@ public class SQLProcessor {
 		}
 
 		public void preprocess() throws IOException {
-			new SQLProcessor(this).preprocess();
+			try {
+				try {
+					new SQLProcessor(this).preprocess();
+				} finally {
+					writer.close();
+				}
+			} finally {
+				reader.close();
+			}
 		}
 
 	}
@@ -82,14 +80,14 @@ public class SQLProcessor {
 
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final Pattern PRECEDING_WHITESPACE = Pattern.compile("^\\s*");
-	private static final Pattern PARAMETER = Pattern.compile("\\{(?<direction>in|out):(?<type>ARRAY|BIGINT|BINARY|BIT|BLOB|BOOLEAN|CHAR|CLOB|DATALINK|DATE|DECIMAL|DISTINCT|DOUBLE|FLOAT|INTEGER|JAVA_OBJECT|LONGNVARCHAR|LONGVARBINARY|LONGVARCHAR|NCHAR|NCLOB|NULL|NUMERIC|NVARCHAR|OTHER|REAL|REF|ROWID|SMALLINT|SQLXML|STRUCT|TIME|TIMESTAMP|TINYINT|VARBINARY|VARCHAR):(?<name>[a-z][a-zA-Z0-9]*)\\}");
+	private static final Pattern PARAMETER = Pattern.compile("\\{(?<direction>in|out):(?<type>[A-Z][A-Z_]+):(?<name>[a-z][a-zA-Z0-9]*)\\}");
 
 	private final BufferedReader reader;
-	private final BufferedWriter writer;
+	private final AutoIndentingWriter writer;
 	private final String className;
 	private final String namespace;
-	private final SQLParameters arguments = new SQLParameters();
-	private final SQLParameters columns = new SQLParameters();
+	private final Parameters arguments = new Parameters();
+	private final ResultColumns columns = new ResultColumns();
 
 	public SQLProcessor(Builder builder) {
 		this.namespace = builder.namespace;
@@ -99,27 +97,22 @@ public class SQLProcessor {
 	}
 
 	public void preprocess() throws IOException {
-		try {
-			writeNamespace();
-			writeImports();
-			writeStartOfClass();
-			writeSQLConstant();
-			writeResultClass();
-			writeParameterInterfaces();
-			writeStartPrepareClass();
-			writeParameterSetters();
-			writeExecuteMethod();
-			writeEndPreparedClass();
-			writePrepareMethod();
-			writeEndOfClass();
-		} finally {
-			writer.flush();
-		}
+		writeNamespace();
+		writeImports();
+		writeStartOfClass();
+		writeSQLConstant();
+		writeResultClass();
+		writeParameterInterfaces();
+		writeStartPrepareClass();
+		writeParameterSetters();
+		writeEndPreparedClass();
+		writePrepareMethod();
+		writeEndOfClass();
 	}
 
 	private void writeNamespace() throws IOException {
-		writeLine("package ", namespace, ";");
-		writeLine();
+		writer.writeLine("package ", namespace, ";");
+		writer.writeEmptyLine();
 	}
 
 	private final String[] IMPORTS = {
@@ -130,19 +123,19 @@ public class SQLProcessor {
 
 	private void writeImports() throws IOException {
 		for (String classNameOfImport : IMPORTS) {
-			writeLine("import ", classNameOfImport, ";");
+			writer.writeLine("import ", classNameOfImport, ';');
 		}
-		writeLine();
+		writer.writeEmptyLine();
 	}
 
 	private void writeStartOfClass() throws IOException {
-		writeLine("public final class ", className, " {");
-		writeLine();
+		writer.writeLine("public final class ", className, " {");
+		writer.writeEmptyLine();
 	}
 
 	private void writeSQLConstant() throws IOException {
-		writeLine("	public static final String SQL = String.join(");
-		writeLine("		System.lineSeparator(),");
+		writer.writeLine("public static final String SQL = String.join(");
+		writer.writeLine("System.lineSeparator(),");
 		boolean first = true;
 		while (true) {
 			final String line = reader.readLine();
@@ -163,284 +156,106 @@ public class SQLProcessor {
 			if (first) {
 				first = false;
 			} else {
-				writeLine(",");
+				writer.write(",");
+				writer.writeLineBreak();
 			}
-			write(precedingWhitespace);
-			write("		", '"');
+			writer.write(precedingWhitespace);
+			writer.write('"');
 			final Matcher matcher = PARAMETER.matcher(escaped);
 			if (matcher.find()) {
 				int end = 0;
 				do {
 					final int start = matcher.start();
-					final CharSequence before = escaped.subSequence(end, start);
-					write(before);
+					final String before = escaped.substring(end, start);
+					writer.write(before);
 					final String direction = matcher.group("direction");
-					final SQLParameterType type = SQLParameterType.valueOf(matcher.group("type"));
+					final String nameOfType = matcher.group("type");
 					final String name = matcher.group("name");
 					if (direction.equals("in")) {
-						arguments.add(name, type);
-						write('?');
+						arguments.add(name, nameOfType);
+						writer.write('?');
 					} else {
-						if (columns.add(name, type).getPositions().size() == 1) {
-							write(name);
-						} else {
-							throw new IllegalArgumentException("Output names must be unique!");
-						}
+						columns.add(name, nameOfType);
+						writer.write(name);
 					}
 					end = matcher.end();
 				} while (matcher.find());
-				final CharSequence after = escaped.subSequence(end, escaped.length());
-				write(after);
+				final String after = escaped.substring(end, escaped.length());
+				writer.write(after);
 			} else {
-				write(escaped);
+				writer.write(escaped);
 			}
-			write('"');
+			writer.write('"');
 		}
-		writeLine();
-		writeLine("	);");
-		writeLine();
+		writer.writeLineBreak();
+		writer.writeLine(");");
+		writer.writeEmptyLine();
 	}
 
 	private void writeResultClass() throws IOException {
-		if (columns.size() < 2) {
-			return;
-		}
-		writeLine("	public static final class Result {");
-		writeLine();
-		for (SQLParameter column : columns) {
-			final String definition = column.getDefinition();
-			writeLine("		private ", definition, ";");
-		}
-		writeLine();
-		writeLine("		private Result(");
-		final Iterator<SQLParameter> iterator = columns.iterator();
-		while (true) {
-			final SQLParameter column = iterator.next();
-			final String definition = column.getDefinition();
-			if (iterator.hasNext()) {
-				writeLine("			", definition, ",");
-			} else {
-				writeLine("			", definition);
-				break;
-			}
-		}
-		writeLine("		) {");
-		for (SQLParameter column : columns) {
-			final String name = column.getNameInLowerCamelCase();
-			writeLine("			this.", name, " = ", name, ";");
-		}
-		writeLine("		}");
-		writeLine();
-		for (SQLParameter column : columns) {
-			final String nameInLowerCamel = column.getNameInLowerCamelCase();
-			final String nameInUpperCamel = column.getNameInUpperCamelCase();
-			final String type = column.getType().getNameOfJavaType();
-			writeLine("		public final ", type, " get", nameInUpperCamel, "() {");
-			writeLine("			return ", nameInLowerCamel, ";");
-			writeLine("		}");
-			writeLine();
-		}
-		writeLine("	}");
-		writeLine();
-	}
-
-	private String getNameOfExecutorClass() {
-		final int numberOfColumns = columns.size();
-		switch (numberOfColumns) {
-			case 0:
-				return "UpdateExecutable";
-			case 1:
-				return columns.iterator().next().getType().getNameOfSingleParameterExecutor();
-			default:
-				return "ObjectStreamExecutable<Result>";
-		}
+		columns.writeResultClassToIfNecessary(writer);
 	}
 
 	private void writeParameterInterfaces() throws IOException {
-		final Iterator<SQLParameter> iterator = arguments.iterator();
-		if (iterator.hasNext()) {
-			SQLParameter current = iterator.next();
-			do {
-				final String argumentName = current.getNameInLowerCamelCase();
-				final SQLParameterType type = current.getType();
-				final String argumentType = type.getNameOfJavaType();
-				writeLine("	public interface ", current.getNameOfInterface(), " {");
-				final String returnType;
-				final SQLParameter next;
-				if (iterator.hasNext()) {
-					next = iterator.next();
-					returnType = next.getNameOfInterface();
-				} else {
-					next = null;
-					returnType = getNameOfExecutorClass();
-				}
-				if (type.canBeNull() == false) {
-					final String withoutMethodName = current.getNameOfWithoutMethod();
-					writeLine("		", returnType, " ", withoutMethodName, "();");
-				}
-				final String withMethodName = current.getNameOfWithMethod();
-				writeLine("		", returnType, " ", withMethodName, "(", argumentType, " ", argumentName, ");");
-				writeLine("	}");
-				writeLine();
-				current = next;
-			} while (current != null);
-		}
+		final String lastReturnType = columns.getNameOfExecutorClass();
+		arguments.writeInterfacesTo(writer, lastReturnType);
 	}
 
 	public void writeStartPrepareClass() throws IOException {
-		write("	private static final class Prepared extends ", getNameOfExecutorClass());
-		final Iterator<SQLParameter> iterator = arguments.iterator();
+		writer.write("private static final class Prepared extends ");
+		writer.write(columns.getNameOfExecutorClass());
+		final Iterator<Parameter> iterator = arguments.iterator();
 		if (iterator.hasNext()) {
-			write(" implements ");
+			writer.write(" implements ");
 			while (true) {
-				final SQLParameter parameter = iterator.next();
+				final Parameter parameter = iterator.next();
 				final String nameOfInterface = parameter.getNameOfInterface();
-				write(nameOfInterface);
+				writer.write(nameOfInterface);
 				if (iterator.hasNext()) {
-					write(", ");
+					writer.write(", ");
 				} else {
 					break;
 				}
 			}
 		}
-		writeLine(" {");
-		writeLine();
-		writeLine("		private Prepared(Connection connection, ConnectionHandling handling) {");
-		writeLine("			super(SQL, connection, handling);");
-		writeLine("		}");
-		writeLine();
+		writer.writeLine(" {");
+		writer.writeEmptyLine();
+		writer.writeLine("private Prepared(Connection connection, ConnectionHandling handling) {");
+		writer.writeLine("super(SQL, connection, handling);");
+		writer.writeLine("}");
+		writer.writeEmptyLine();
 	}
 
 	public void writeParameterSetters() throws IOException {
-		final Iterator<SQLParameter> iterator = arguments.iterator();
-		if (iterator.hasNext()) {
-			SQLParameter current = iterator.next();
-			SQLParameter next;
-			do {
-				final String returnType;
-				if (iterator.hasNext()) {
-					next = iterator.next();
-					returnType = next.getNameOfInterface();
-				} else {
-					next = null;
-					returnType = getNameOfExecutorClass();
-				}
-				final String argumentName = current.getNameInLowerCamelCase();
-				final String withMethodName = current.getNameOfWithMethod();
-				final SQLParameterType type = current.getType();
-				final String argumentType = type.getNameOfJavaType();
-				if (type.canBeNull() == false) {
-					final String withoutMethodName = current.getNameOfWithoutMethod();
-					writeLine("		@Override");
-					writeLine("		public final ", returnType, " ", withoutMethodName, "() {");
-					writeLine("			return safelyUseStatement(statement -> {");
-					for (int position : current.getPositions()) {
-						writeLine("				statement.setNull(", position, ", Types." + type.name(), ");");
-					}
-					writeLine("				return this;");
-					writeLine("			});");
-					writeLine("		}");
-					writeLine();
-				}
-				writeLine("		@Override");
-				writeLine("		public final ", returnType, " ", withMethodName, "(", argumentType, " ", argumentName, ") {");
-				writeLine("			return safelyUseStatement(statement -> {");
-				if (type.canBeNull()) {
-					writeLine("				if (", argumentName, " == null) {");
-					for (int position : current.getPositions()) {
-						writeLine("					statement.setNull(", position, ", Types." + type.name(), ");");
-					}
-					writeLine("				} else {");
-					for (int position : current.getPositions()) {
-						writeLine("					statement.", type.getSetter(position, argumentName), ";");
-					}
-					writeLine("				}");
-				} else {
-					for (int position : current.getPositions()) {
-						writeLine("					statement.", type.getSetter(position, argumentName), ";");
-					}
-				}
-				writeLine("				return this;");
-				writeLine("			});");
-				writeLine("		}");
-				writeLine();
-				current = next;
-			} while (current != null);
-		}
-	}
-
-	public void writeExecuteMethod() throws IOException {
-		final int numberOfColumns = columns.size();
-		if (numberOfColumns < 2) {
-			return;
-		}
-		writeLine("		@Override");
-		writeLine("		protected final Result read(ResultSet results) throws SQLException {");
-		for (SQLParameter column : columns) {
-			final SQLParameterType type = column.getType();
-			final String nameInLowerCamel = column.getNameInLowerCamelCase();
-			final String nameOfType = type.getNameOfJavaType();
-			final int position = column.getPositions().iterator().next();
-			final String getter = type.getGetter(position);
-			writeLine("			final ", nameOfType, " ", nameInLowerCamel, " = results.", getter, ";");
-		}
-		writeLine("			return new Result(");
-		final Iterator<SQLParameter> columnIterator = columns.iterator();
-		while (columnIterator.hasNext()) {
-			final SQLParameter column = columnIterator.next();
-			final String nameInLowerCamel = column.getNameInLowerCamelCase();
-			write("					", nameInLowerCamel);
-			if (columnIterator.hasNext()) {
-				writeLine(",");
-			} else {
-				writeLine();
-			}
-		}
-		writeLine("			);");
-		writeLine("		}");
-		writeLine();
+		final String lastReturnType = columns.getNameOfExecutorClass();
+		arguments.writeImplemenationOfInterfacesTo(writer, lastReturnType);
 	}
 
 	public void writeEndPreparedClass() throws IOException {
-		writeLine("	}");
-		writeLine();
+		writer.writeLine('}');
+		writer.writeEmptyLine();
 	}
 
 	public void writePrepareMethod() throws IOException {
 		final String nameOfFirstInterface = getNameOfFirstInterface();
-		writeLine("	public static final ", nameOfFirstInterface, " using(Connection connection, ConnectionHandling handling) {");
-		writeLine("		return new Prepared(connection, handling);");
-		writeLine("	}");
-		writeLine();
+		writer.writeLine("public static final ", nameOfFirstInterface, " using(Connection connection, ConnectionHandling handling) {");
+		writer.writeLine("return new Prepared(connection, handling);");
+		writer.writeLine('}');
+		writer.writeEmptyLine();
 	}
 
 	private String getNameOfFirstInterface() {
-		final Iterator<SQLParameter> iterator = arguments.iterator();
+		final Iterator<Parameter> iterator = arguments.iterator();
 		if (iterator.hasNext()) {
-			final SQLParameter first = iterator.next();
+			final Parameter first = iterator.next();
 			return first.getNameOfInterface();
 		} else {
-			return getNameOfExecutorClass();
+			return columns.getNameOfExecutorClass();
 		}
 	}
 
 	private void writeEndOfClass() throws IOException {
-		writeLine("}");
-	}
-
-	private void write(Object ... contentsOfLine) throws IOException {
-		for (Object value : contentsOfLine) {
-			writer.append(value.toString());
-		}
-	}
-
-	private void writeLine(Object ... contentsOfLine) throws IOException {
-		write(contentsOfLine);
-		writer.newLine();
-	}
-
-	private void writeLine() throws IOException {
-		writer.newLine();
+		writer.writeLine("}");
 	}
 
 	private String findPrecedingWhitespaceIn(String line) {

@@ -5,7 +5,14 @@ import com.google.common.io.BaseEncoding;
 import com.opentable.db.postgres.embedded.EmbeddedPostgreSQLRule;
 import java.sql.Connection;
 import java.time.Instant;
-import org.junit.Assert;
+import java.util.OptionalDouble;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -14,27 +21,46 @@ public class FunctionalTests {
 	@ClassRule
 	public static final EmbeddedPostgreSQLRule postgres = new EmbeddedPostgreSQLRule();
 
-	private Connection openConnection() throws Throwable {
+	private static Connection openConnection() throws Throwable {
 		return postgres.getEmbeddedPostgreSQL().getPostgresDatabase().getConnection();
+	}
+
+	@BeforeClass
+	public static void createAssertFunction() throws Throwable {
+		CreateAssertFunction
+			.using(openConnection(), CLOSE_WHEN_DONE)
+			.execute();
 	}
 
 	private static final byte[] FIRST_EXPECTED_BYTE_ARRAY = BaseEncoding.base16().decode("DEADBEEF");
 	private static final byte[] SECOND_EXPECTED_BYTE_ARRAY = BaseEncoding.base16().decode("4321FEED1234");
 
 	@Test
+	public void testAssertShouldFail() throws Throwable {
+		try {
+			TestAssertShouldFail
+				.using(openConnection(), CLOSE_WHEN_DONE)
+				.execute();
+			fail("Should have thrown an exception!");
+		} catch (RuntimeSQLException exception) {
+			final String message = exception.getMessage();
+			assertTrue(message.contains("Assertion failed!"));
+		}
+	}
+
+	@Test
 	public void testByteArrayParameter() throws Throwable {
-		testByteArrayParameter(FIRST_EXPECTED_BYTE_ARRAY);
+		TestByteArrayParameter
+			.using(openConnection(), CLOSE_WHEN_DONE)
+			.withInput(FIRST_EXPECTED_BYTE_ARRAY)
+			.execute();
 	}
 
 	@Test
 	public void testNullByteArrayParameter() throws Throwable {
-		testByteArrayParameter(null);
-	}
-
-	private void testByteArrayParameter(byte[] expected) throws Throwable {
-		TestByteArrayParameter
+		TestNullByteArrayParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.withInput(expected)
+			.withInput(null)
 			.execute();
 	}
 
@@ -45,7 +71,7 @@ public class FunctionalTests {
 			.execute()
 			.findFirst()
 			.get();
-		Assert.assertArrayEquals(FIRST_EXPECTED_BYTE_ARRAY, actual);
+		assertArrayEquals(FIRST_EXPECTED_BYTE_ARRAY, actual);
 	}
 
 	@Test
@@ -55,9 +81,9 @@ public class FunctionalTests {
 			.execute()
 			.findFirst()
 			.get();
-		Assert.assertNotNull(actual);
-		Assert.assertArrayEquals(FIRST_EXPECTED_BYTE_ARRAY, actual.getFirstOutput());
-		Assert.assertArrayEquals(SECOND_EXPECTED_BYTE_ARRAY, actual.getSecondOutput());
+		assertNotNull(actual);
+		assertArrayEquals(FIRST_EXPECTED_BYTE_ARRAY, actual.getFirstOutput());
+		assertArrayEquals(SECOND_EXPECTED_BYTE_ARRAY, actual.getSecondOutput());
 	}
 
 	private static final double FIRST_EXPECTED_DOUBLE = 3.14;
@@ -73,7 +99,7 @@ public class FunctionalTests {
 
 	@Test
 	public void testNullDoubleParameter() throws Throwable {
-		TestDoubleParameter
+		TestNullDoubleParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withoutInput()
 			.execute();
@@ -86,7 +112,7 @@ public class FunctionalTests {
 			.execute()
 			.findFirst()
 			.getAsDouble();
-		Assert.assertEquals(FIRST_EXPECTED_DOUBLE, actual, 1e-10);
+		assertEquals(FIRST_EXPECTED_DOUBLE, actual, 1e-10);
 	}
 
 	@Test
@@ -96,9 +122,29 @@ public class FunctionalTests {
 			.execute()
 			.findFirst()
 			.get();
-		Assert.assertNotNull(actual);
-		Assert.assertEquals(FIRST_EXPECTED_DOUBLE, actual.getFirstOutput(), 1e-10);
-		Assert.assertEquals(SECOND_EXPECTED_DOUBLE, actual.getSecondOutput(), 1e-10);
+		assertNotNull(actual);
+		assertEquals(FIRST_EXPECTED_DOUBLE, actual.getFirstOutput(), 1e-10);
+		assertEquals(SECOND_EXPECTED_DOUBLE, actual.getSecondOutput(), 1e-10);
+	}
+
+	@Test
+	public void testOptionalDoubleResult() throws Throwable {
+		final OptionalDouble actual = TestOptionalDoubleResult
+			.using(openConnection(), CLOSE_WHEN_DONE)
+			.execute()
+			.findFirst()
+			.get();
+		assertEquals(FIRST_EXPECTED_DOUBLE, actual.getAsDouble(), 1e-10);
+	}
+
+	@Test
+	public void testNullOptionalDoubleResult() throws Throwable {
+		final OptionalDouble actual = TestNullOptionalDoubleResult
+			.using(openConnection(), CLOSE_WHEN_DONE)
+			.execute()
+			.findFirst()
+			.get();
+		assertFalse(actual.isPresent());
 	}
 
 	private static final Instant FIRST_EXPECTED_INSTANT = Instant.parse("2004-10-19T10:23:54Z");
@@ -106,18 +152,17 @@ public class FunctionalTests {
 
 	@Test
 	public void testInstantParameter() throws Throwable {
-		testInstantParameter(FIRST_EXPECTED_INSTANT);
+		TestInstantParameter
+			.using(openConnection(), CLOSE_WHEN_DONE)
+			.withInput(FIRST_EXPECTED_INSTANT)
+			.execute();
 	}
 
 	@Test
 	public void testNullInstantParameter() throws Throwable {
-		testInstantParameter(null);
-	}
-
-	private void testInstantParameter(Instant expected) throws Throwable {
-		TestInstantParameter
+		TestNullInstantParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.withInput(expected)
+			.withInput(null)
 			.execute();
 	}
 
@@ -128,7 +173,7 @@ public class FunctionalTests {
 			.execute()
 			.findFirst()
 			.get();
-		Assert.assertEquals(FIRST_EXPECTED_INSTANT, actual);
+		assertEquals(FIRST_EXPECTED_INSTANT, actual);
 	}
 
 	@Test
@@ -138,9 +183,9 @@ public class FunctionalTests {
 			.execute()
 			.findFirst()
 			.get();
-		Assert.assertNotNull(actual);
-		Assert.assertEquals(FIRST_EXPECTED_INSTANT, actual.getFirstOutput());
-		Assert.assertEquals(SECOND_EXPECTED_INSTANT, actual.getSecondOutput());
+		assertNotNull(actual);
+		assertEquals(FIRST_EXPECTED_INSTANT, actual.getFirstOutput());
+		assertEquals(SECOND_EXPECTED_INSTANT, actual.getSecondOutput());
 	}
 
 	private static final int FIRST_EXPECTED_INTEGER = 42;
@@ -156,7 +201,7 @@ public class FunctionalTests {
 
 	@Test
 	public void testNullIntegerParameter() throws Throwable {
-		TestIntegerParameter
+		TestNullIntegerParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withoutInput()
 			.execute();
@@ -169,7 +214,7 @@ public class FunctionalTests {
 			.execute()
 			.findFirst()
 			.getAsInt();
-		Assert.assertEquals(FIRST_EXPECTED_INTEGER, actual);
+		assertEquals(FIRST_EXPECTED_INTEGER, actual);
 	}
 
 	@Test
@@ -179,9 +224,9 @@ public class FunctionalTests {
 			.execute()
 			.findFirst()
 			.get();
-		Assert.assertNotNull(actual);
-		Assert.assertEquals(FIRST_EXPECTED_INTEGER, actual.getFirstOutput());
-		Assert.assertEquals(SECOND_EXPECTED_INTEGER, actual.getSecondOutput());
+		assertNotNull(actual);
+		assertEquals(FIRST_EXPECTED_INTEGER, actual.getFirstOutput());
+		assertEquals(SECOND_EXPECTED_INTEGER, actual.getSecondOutput());
 	}
 
 	private static final String FIRST_EXPECTED_STRING = "Bees?";
@@ -189,18 +234,17 @@ public class FunctionalTests {
 
 	@Test
 	public void testStringParameter() throws Throwable {
-		testStringParameter(FIRST_EXPECTED_STRING);
+		TestStringParameter
+			.using(openConnection(), CLOSE_WHEN_DONE)
+			.withInput(FIRST_EXPECTED_STRING)
+			.execute();
 	}
 
 	@Test
 	public void testNullStringParameter() throws Throwable {
-		testStringParameter(null);
-	}
-
-	private void testStringParameter(String expected) throws Throwable {
-		TestStringParameter
+		TestNullStringParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.withInput(expected)
+			.withInput(null)
 			.execute();
 	}
 
@@ -211,7 +255,7 @@ public class FunctionalTests {
 			.execute()
 			.findFirst()
 			.get();
-		Assert.assertEquals(FIRST_EXPECTED_STRING, actual);
+		assertEquals(FIRST_EXPECTED_STRING, actual);
 	}
 
 	@Test
@@ -221,9 +265,9 @@ public class FunctionalTests {
 			.execute()
 			.findFirst()
 			.get();
-		Assert.assertNotNull(actual);
-		Assert.assertEquals(FIRST_EXPECTED_STRING, actual.getFirstOutput());
-		Assert.assertEquals(SECOND_EXPECTED_STRING, actual.getSecondOutput());
+		assertNotNull(actual);
+		assertEquals(FIRST_EXPECTED_STRING, actual.getFirstOutput());
+		assertEquals(SECOND_EXPECTED_STRING, actual.getSecondOutput());
 	}
 
 	@Test
@@ -231,7 +275,7 @@ public class FunctionalTests {
 		final int rowsAffected = TestUpdate
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.execute();
-		Assert.assertEquals(0, rowsAffected);
+		assertEquals(0, rowsAffected);
 	}
 
 }

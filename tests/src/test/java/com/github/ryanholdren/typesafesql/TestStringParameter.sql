@@ -1,1 +1,1 @@
-CREATE TEMPORARY TABLE test AS SELECT {in:VARCHAR:input};
+SELECT ASSERT({in:VARCHAR:input} = 'Bees?');
