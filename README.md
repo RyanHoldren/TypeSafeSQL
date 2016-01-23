@@ -56,12 +56,11 @@ public class SomeClass {
 		LookupUser
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withUsername("tester.mctesting")
-			.execute()
-			.forEach(result -> {
+			.execute(stream -> stream.forEach(result -> {
 				System.out.println(result.getFirstName());
 				System.out.println(result.getLastName());
 				System.out.println(result.getAge());
-			});
+			}));
 	}
 }
 ```
