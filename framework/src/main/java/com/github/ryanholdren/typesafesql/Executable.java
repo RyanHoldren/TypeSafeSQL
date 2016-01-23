@@ -7,7 +7,8 @@ import java.sql.SQLException;
 
 public abstract class Executable {
 
-	private final PreparedStatement statement;
+	protected final PreparedStatement statement;
+
 	private final Connection connection;
 	private final ConnectionHandling handling;
 
@@ -52,7 +53,7 @@ public abstract class Executable {
 		}
 	}
 
-	private final void closeConnectionIfApplicable() throws SQLException {
+	private void closeConnectionIfApplicable() throws SQLException {
 		if (handling == CLOSE_WHEN_DONE) {
 			connection.close();
 		}

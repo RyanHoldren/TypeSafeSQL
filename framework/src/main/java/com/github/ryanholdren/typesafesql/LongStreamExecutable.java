@@ -3,6 +3,7 @@ package com.github.ryanholdren.typesafesql;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.NoSuchElementException;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.LongConsumer;
@@ -39,6 +40,23 @@ public class LongStreamExecutable extends StreamExecutable<Long, LongStream> {
 			},
 			false
 		);
+	}
+
+	public final long execute() {
+		try {
+			try {
+				final ResultSet results = getResultSetFrom(statement);
+				if (results.next()) {
+					return results.getLong(1);
+				} else {
+					throw new NoSuchElementException();
+				}
+			} finally {
+				close();
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeSQLException(exception);
+		}
 	}
 
 }

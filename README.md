@@ -72,7 +72,7 @@ Add the TypeSafeSQL plugin to your ```pom.xml```:
 <plugin>
 	<groupId>com.github.ryanholdren.typesafesql</groupId>
 	<artifactId>plugin</artifactId>
-	<version>2016-01-17</version>
+	<version>2016-01-22</version>
 	<executions>
 		<execution>
 			<goals>
@@ -88,6 +88,6 @@ Also add a dependency on the TypeSafeSQL's framework classes:
 <dependency>
 	<groupId>com.github.ryanholdren.typesafesql</groupId>
 	<artifactId>framework</artifactId>
-	<version>2016-01-17</version>
+	<version>2016-01-22</version>
 </dependency>
 ```

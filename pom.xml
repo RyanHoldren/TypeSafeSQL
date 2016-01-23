@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.ryanholdren.typesafesql</groupId>
   <artifactId>parent</artifactId>
-  <version>2016-01-17</version>
+  <version>2016-01-22</version>
   <packaging>pom</packaging>
   <name>TypeSafeSQL</name>
   <description>A Maven plugin for preprocessing SQL files into type-safe Java classes.</description>
@@ -21,6 +21,7 @@
     <developer>
       <name>Ryan C. Holdren</name>
       <email>ryan.c.holdren@gmail.com</email>
+      <url>https://github.com/RyanHoldren/</url>
     </developer>
   </developers>
 

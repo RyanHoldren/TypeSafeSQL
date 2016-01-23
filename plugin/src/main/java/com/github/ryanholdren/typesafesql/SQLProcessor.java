@@ -118,6 +118,7 @@ public class SQLProcessor {
 	private final String[] IMPORTS = {
 		"java.sql.*",
 		"java.time.*",
+		"java.util.*",
 		"com.github.ryanholdren.typesafesql.*"
 	};
 

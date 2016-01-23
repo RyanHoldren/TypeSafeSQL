@@ -3,6 +3,7 @@ package com.github.ryanholdren.typesafesql;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.NoSuchElementException;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
@@ -14,8 +15,6 @@ public abstract class ObjectStreamExecutable<T> extends StreamExecutable<T, Stre
 	public ObjectStreamExecutable(String sql, Connection connection, ConnectionHandling handling) {
 		super(sql, connection, handling);
 	}
-
-	protected abstract T read(ResultSet results) throws SQLException;
 
 	@Override
 	protected final Stream<T> helpExecute(ResultSet results) {
@@ -42,5 +41,24 @@ public abstract class ObjectStreamExecutable<T> extends StreamExecutable<T, Stre
 			false
 		);
 	}
+
+	public final T execute() {
+		try {
+			try {
+				final ResultSet results = getResultSetFrom(statement);
+				if (results.next()) {
+					return read(results);
+				} else {
+					throw new NoSuchElementException();
+				}
+			} finally {
+				close();
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeSQLException(exception);
+		}
+	}
+
+	protected abstract T read(ResultSet results) throws SQLException;
 
 }
