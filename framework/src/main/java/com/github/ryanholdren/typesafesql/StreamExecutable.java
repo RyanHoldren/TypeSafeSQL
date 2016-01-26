@@ -10,22 +10,22 @@ import java.util.stream.BaseStream;
 
 public abstract class StreamExecutable<T, S extends BaseStream<T, S>> extends Executable {
 
+	protected static final ResultSet getResultSetFrom(PreparedStatement statement) throws SQLException {
+		boolean isResultSet = statement.execute();
+		do {
+			if (isResultSet) {
+				return statement.getResultSet();
+			}
+			isResultSet = statement.getMoreResults();
+		} while (isResultSet || statement.getUpdateCount() != -1);
+		throw new IllegalStateException("Could not find result set!");
+	}
+
 	public StreamExecutable(String sql, Connection connection, ConnectionHandling handling) {
 		super(sql, connection, handling);
 	}
 
-	protected ResultSet getResultSetFrom(PreparedStatement statement) throws SQLException {
-		boolean isResultSet = statement.execute();
-			do {
-				if (isResultSet) {
-					return statement.getResultSet();
-				}
-				isResultSet = statement.getMoreResults();
-			} while (isResultSet || statement.getUpdateCount() != -1);
-			throw new IllegalStateException("Could not find result set!");
-	}
-
-	private S executeStream() {
+	protected final S executeStream() {
 		return safelyUseStatement(statement -> {
 			final ResultSet results = getResultSetFrom(statement);
 			final Runnable cleanup = () -> {
@@ -45,13 +45,17 @@ public abstract class StreamExecutable<T, S extends BaseStream<T, S>> extends Ex
 	}
 
 	public final T execute(Function<S, T> action) {
-		try (S stream = executeStream()) {
+		try (
+			final S stream = executeStream()
+		) {
 			return action.apply(stream);
 		}
 	}
 
 	public final void execute(Consumer<S> action) {
-		try (S stream = executeStream()) {
+		try (
+			final S stream = executeStream()
+		) {
 			action.accept(stream);
 		}
 	}
