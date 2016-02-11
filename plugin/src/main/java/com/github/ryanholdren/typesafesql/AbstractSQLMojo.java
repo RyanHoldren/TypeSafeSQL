@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.maven.plugin.AbstractMojo;
@@ -31,6 +33,8 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 		final Path rootPath = Paths.get(root);
 		if (Files.isDirectory(rootPath)) {
 			System.out.println("Processing SQL files in '" + root + "' into '" + output + "'...");
+			final LongAdder skipped = new LongAdder();
+			final LongAdder generated = new LongAdder();
 			try {
 				Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
 					@Override
@@ -45,6 +49,14 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 								rootPattern,
 								output
 							);
+							if (Files.exists(javaPath)) {
+								final Instant lastModified = Files.getLastModifiedTime(sqlPath).toInstant();
+								final Instant lastGenerated = Files.getLastModifiedTime(javaPath).toInstant();
+								if (lastGenerated.isAfter(lastModified)) {
+									skipped.increment();
+									return FileVisitResult.CONTINUE;
+								}
+							}
 							final String path = sqlPath.toString();
 							final String className = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
 							final String namespace = path.substring(rootPath.toString().length() + 1, path.lastIndexOf('/')).replace(File.separator.charAt(0), '.');
@@ -56,6 +68,7 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 									.setReader(sqlPath)
 									.setWriter(javaPath)
 									.preprocess();
+								generated.increment();
 							} catch (IOException exception) {
 								throw new RuntimeException(exception);
 							}
@@ -66,6 +79,13 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 			} catch (IOException exception) {
 				throw new RuntimeException(exception);
 			}
+			System.out.println(
+				String.format(
+					"Generated %d SQL files and skipped unmodified %d files.",
+					generated.longValue(),
+					skipped.longValue()
+				)
+			);
 		} else {
 			System.out.println("Skipping processing SQL files in '" + root + "' because it does not exist...");
 		}
