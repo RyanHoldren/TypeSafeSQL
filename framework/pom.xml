@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.github.ryanholdren.typesafesql</groupId>
     <artifactId>parent</artifactId>
-    <version>2016-02-10</version>
+    <version>2016-03-18</version>
   </parent>
   <artifactId>framework</artifactId>
   <name>TypeSafeSQL Framework</name>

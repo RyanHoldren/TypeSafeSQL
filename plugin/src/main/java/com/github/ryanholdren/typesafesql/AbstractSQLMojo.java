@@ -9,12 +9,20 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 
 public abstract class AbstractSQLMojo extends AbstractMojo {
 
@@ -28,39 +36,60 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 	}
 
 	protected void process(String root, String output) throws MojoExecutionException, MojoFailureException {
+		final Path rootPath = Paths.get(root);
+		final Log log = getLog();
+		if (Files.isDirectory(rootPath) == false) {
+			log.error("Skipping processing SQL files in '" + root + "' because it does not exist...");
+			return;
+		}
+		log.info("Processing SQL files in '" + root + "' into '" + output + "'...");
 		final Pattern rootPattern = Pattern.compile(root, Pattern.LITERAL);
 		final Pattern sqlPattern = Pattern.compile("\\.sql$");
-		final Path rootPath = Paths.get(root);
-		if (Files.isDirectory(rootPath)) {
-			System.out.println("Processing SQL files in '" + root + "' into '" + output + "'...");
-			final LongAdder skipped = new LongAdder();
-			final LongAdder generated = new LongAdder();
-			try {
-				Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
-					@Override
-					public FileVisitResult visitFile(Path sqlPath, BasicFileAttributes attrs) throws IOException {
-						if (sqlPath.toString().endsWith(".sql")) {
-							final Path javaPath = replaceInPath(
-								replaceInPath(
-									sqlPath,
-									sqlPattern,
-									".java"
-								),
-								rootPattern,
-								output
-							);
-							if (Files.exists(javaPath)) {
-								final Instant lastModified = Files.getLastModifiedTime(sqlPath).toInstant();
-								final Instant lastGenerated = Files.getLastModifiedTime(javaPath).toInstant();
-								if (lastGenerated.isAfter(lastModified)) {
-									skipped.increment();
-									return FileVisitResult.CONTINUE;
-								}
+		final LongAdder created = new LongAdder();
+		final LongAdder updated = new LongAdder();
+		final LongAdder skipped = new LongAdder();
+		final Set<Path> javaPaths = Collections.newSetFromMap(new ConcurrentHashMap<>());
+		final AtomicInteger numberOfThreads = new AtomicInteger(0);
+		final ExecutorService executor = Executors.newFixedThreadPool(
+			Runtime.getRuntime().availableProcessors(),
+			runnable -> {
+				final Thread thread = new Thread(runnable, "SQL Processing Worker #" + numberOfThreads.incrementAndGet());
+				thread.setDaemon(true);
+				return thread;
+			}
+		);
+		try {
+			Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path sqlPath, BasicFileAttributes attrs) throws IOException {
+					if (sqlPath.toString().endsWith(".sql")) {
+						final Path javaPath = replaceInPath(
+							replaceInPath(
+								sqlPath,
+								sqlPattern,
+								".java"
+							),
+							rootPattern,
+							output
+						);
+						javaPaths.add(javaPath);
+						if (Files.exists(javaPath)) {
+							final Instant lastModified = Files.getLastModifiedTime(sqlPath).toInstant();
+							final Instant lastGenerated = Files.getLastModifiedTime(javaPath).toInstant();
+							if (lastGenerated.isAfter(lastModified)) {
+								skipped.increment();
+								return FileVisitResult.CONTINUE;
+							} else {
+								updated.increment();
 							}
-							final String path = sqlPath.toString();
-							final String className = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
-							final String namespace = path.substring(rootPath.toString().length() + 1, path.lastIndexOf('/')).replace(File.separator.charAt(0), '.');
+						} else {
+							created.increment();
+						}
+						executor.submit(() -> {
 							try {
+								final String path = sqlPath.toString();
+								final String className = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
+								final String namespace = path.substring(rootPath.toString().length() + 1, path.lastIndexOf('/')).replace(File.separator.charAt(0), '.');
 								SQLProcessor
 									.newBuilder()
 									.setNamespace(namespace)
@@ -68,26 +97,41 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 									.setReader(sqlPath)
 									.setWriter(javaPath)
 									.preprocess();
-								generated.increment();
-							} catch (IOException exception) {
-								throw new RuntimeException(exception);
+							} catch (Exception exception) {
+								log.error("Encounted exception while processing '" + sqlPath + "':", exception);
 							}
-						}
-						return FileVisitResult.CONTINUE;
+						});
 					}
-				});
-			} catch (IOException exception) {
-				throw new RuntimeException(exception);
+					return FileVisitResult.CONTINUE;
+				}
+			});
+			executor.shutdown();
+			if (executor.awaitTermination(1L, TimeUnit.HOURS) == false) {
+				log.error("Aborting the processing of SQL files because it did not finish within an hour!");
+				return;
 			}
-			System.out.println(
-				String.format(
-					"Generated %d SQL files and skipped unmodified %d files.",
-					generated.longValue(),
-					skipped.longValue()
-				)
+			final LongAdder deleted = new LongAdder();
+			final Path outputPath = Paths.get(output);
+			Files.walkFileTree(outputPath, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path javaPath, BasicFileAttributes attrs) throws IOException {
+					if (javaPaths.contains(javaPath) == false) {
+						Files.delete(javaPath);
+						deleted.increment();
+					}
+					return FileVisitResult.CONTINUE;
+				}
+			});
+			log.info(
+				"\tCreated: " + created.longValue() + System.lineSeparator() +
+				"\tUpdated: " + updated.longValue() + System.lineSeparator() +
+				"\tSkipped: " + skipped.longValue() + System.lineSeparator() +
+				"\tDeleted: " + deleted.longValue() + System.lineSeparator()
 			);
-		} else {
-			System.out.println("Skipping processing SQL files in '" + root + "' because it does not exist...");
+		} catch (Exception exception) {
+			log.error("Encounted exception while processing SQL files in '" + root + "':", exception);
+		} finally {
+			executor.shutdownNow();
 		}
 	}
 
