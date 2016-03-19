@@ -19,7 +19,7 @@ public class IntegerTest extends FunctionalTest {
 		TestIntegerParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withInput(FIRST_EXPECTED_INTEGER)
-			.execute();
+			.getNumberOfRowsAffected();
 	}
 
 	@Test
@@ -27,14 +27,14 @@ public class IntegerTest extends FunctionalTest {
 		TestNullIntegerParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withoutInput()
-			.execute();
+			.getNumberOfRowsAffected();
 	}
 
 	@Test
 	public void testIntegerColumn() throws Throwable {
 		final int actual = TestIntegerColumn
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertEquals(FIRST_EXPECTED_INTEGER, actual);
 	}
 
@@ -42,7 +42,7 @@ public class IntegerTest extends FunctionalTest {
 	public void testTwoIntegerColumns() throws Throwable {
 		final Result actual = TestTwoIntegerColumns
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertNotNull(actual);
 		assertEquals(FIRST_EXPECTED_INTEGER, actual.getFirstOutput());
 		assertEquals(SECOND_EXPECTED_INTEGER, actual.getSecondOutput());

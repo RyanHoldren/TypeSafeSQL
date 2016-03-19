@@ -35,7 +35,7 @@ public class UpdateExecutableTest extends AbstractExecutableTest {
 		when(statement.execute()).thenThrow(anException);
 		try {
 			final UpdateExecutable executable = new UpdateExecutable(NOT_REALLY_SQL, connection, handling);
-			executable.execute();
+			executable.getNumberOfRowsAffected();
 			failBecauseShouldHaveThrownException();
 		} catch (RuntimeSQLException exception) {
 			assertEquals(anException, exception.getCause());

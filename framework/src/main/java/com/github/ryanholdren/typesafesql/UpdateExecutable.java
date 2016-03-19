@@ -9,7 +9,7 @@ public class UpdateExecutable extends Executable {
 		super(sql, connection, handling);
 	}
 
-	public final int execute() {
+	public final int getNumberOfRowsAffected() {
 		final int rowsAffected = safelyUseStatement(statement -> {
 			int totalUpdateCount = 0;
 			boolean isResultSet = statement.execute();

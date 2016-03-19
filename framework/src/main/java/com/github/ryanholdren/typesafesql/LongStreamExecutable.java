@@ -16,6 +16,31 @@ public class LongStreamExecutable extends StreamExecutable<Long, LongStream> {
 		super(sql, connection, handling);
 	}
 
+	public final long getFirstResult() {
+		try {
+			try {
+				final ResultSet results = getResultSetFrom(statement);
+				if (results.next()) {
+					return results.getLong(1);
+				} else {
+					throw new NoSuchElementException();
+				}
+			} finally {
+				close();
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeSQLException(exception);
+		}
+	}
+
+	public final void forEachResult(LongConsumer action) {
+		try (
+			final LongStream stream = execute()
+		) {
+			stream.forEach(action);
+		}
+	}
+
 	@Override
 	protected LongStream helpExecute(ResultSet results) {
 		return StreamSupport.longStream(
@@ -40,23 +65,6 @@ public class LongStreamExecutable extends StreamExecutable<Long, LongStream> {
 			},
 			false
 		);
-	}
-
-	public final long execute() {
-		try {
-			try {
-				final ResultSet results = getResultSetFrom(statement);
-				if (results.next()) {
-					return results.getLong(1);
-				} else {
-					throw new NoSuchElementException();
-				}
-			} finally {
-				close();
-			}
-		} catch (SQLException exception) {
-			throw new RuntimeSQLException(exception);
-		}
 	}
 
 }

@@ -16,6 +16,31 @@ public class DoubleStreamExecutable extends StreamExecutable<Double, DoubleStrea
 		super(sql, connection, handling);
 	}
 
+	public final double getFirstResult() {
+		try {
+			try {
+				final ResultSet results = getResultSetFrom(statement);
+				if (results.next()) {
+					return results.getDouble(1);
+				} else {
+					throw new NoSuchElementException();
+				}
+			} finally {
+				close();
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeSQLException(exception);
+		}
+	}
+
+	public final void forEachResult(DoubleConsumer action) {
+		try (
+			final DoubleStream stream = execute()
+		) {
+			stream.forEach(action);
+		}
+	}
+
 	@Override
 	protected final DoubleStream helpExecute(ResultSet results) {
 		return StreamSupport.doubleStream(
@@ -40,23 +65,6 @@ public class DoubleStreamExecutable extends StreamExecutable<Double, DoubleStrea
 			},
 			false
 		);
-	}
-
-	public final double execute() {
-		try {
-			try {
-				final ResultSet results = getResultSetFrom(statement);
-				if (results.next()) {
-					return results.getDouble(1);
-				} else {
-					throw new NoSuchElementException();
-				}
-			} finally {
-				close();
-			}
-		} catch (SQLException exception) {
-			throw new RuntimeSQLException(exception);
-		}
 	}
 
 }

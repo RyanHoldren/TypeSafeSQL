@@ -25,7 +25,23 @@ public abstract class StreamExecutable<T, S extends BaseStream<T, S>> extends Ex
 		super(sql, connection, handling);
 	}
 
-	protected final S executeStream() {
+	public final <X> X execute(Function<S, X> action) {
+		try (
+			final S stream = execute()
+		) {
+			return action.apply(stream);
+		}
+	}
+
+	public final void execute(Consumer<S> action) {
+		try (
+			final S stream = execute()
+		) {
+			action.accept(stream);
+		}
+	}
+
+	public final S execute() {
 		return safelyUseStatement(statement -> {
 			final ResultSet results = getResultSetFrom(statement);
 			final Runnable cleanup = () -> {
@@ -42,22 +58,6 @@ public abstract class StreamExecutable<T, S extends BaseStream<T, S>> extends Ex
 			final S stream = helpExecute(results);
 			return stream.onClose(cleanup);
 		});
-	}
-
-	public final T execute(Function<S, T> action) {
-		try (
-			final S stream = executeStream()
-		) {
-			return action.apply(stream);
-		}
-	}
-
-	public final void execute(Consumer<S> action) {
-		try (
-			final S stream = executeStream()
-		) {
-			action.accept(stream);
-		}
 	}
 
 	protected abstract S helpExecute(ResultSet results);

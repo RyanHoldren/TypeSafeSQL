@@ -16,6 +16,31 @@ public abstract class ObjectStreamExecutable<T> extends StreamExecutable<T, Stre
 		super(sql, connection, handling);
 	}
 
+	public final T getFirstResult() {
+		try {
+			try {
+				final ResultSet results = getResultSetFrom(statement);
+				if (results.next()) {
+					return read(results);
+				} else {
+					throw new NoSuchElementException();
+				}
+			} finally {
+				close();
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeSQLException(exception);
+		}
+	}
+
+	public final void forEachResult(Consumer<T> action) {
+		try (
+			final Stream<T> stream = execute()
+		) {
+			stream.forEach(action);
+		}
+	}
+
 	@Override
 	protected final Stream<T> helpExecute(ResultSet results) {
 		return StreamSupport.stream(
@@ -40,23 +65,6 @@ public abstract class ObjectStreamExecutable<T> extends StreamExecutable<T, Stre
 			},
 			false
 		);
-	}
-
-	public final T execute() {
-		try {
-			try {
-				final ResultSet results = getResultSetFrom(statement);
-				if (results.next()) {
-					return read(results);
-				} else {
-					throw new NoSuchElementException();
-				}
-			} finally {
-				close();
-			}
-		} catch (SQLException exception) {
-			throw new RuntimeSQLException(exception);
-		}
 	}
 
 	protected abstract T read(ResultSet results) throws SQLException;

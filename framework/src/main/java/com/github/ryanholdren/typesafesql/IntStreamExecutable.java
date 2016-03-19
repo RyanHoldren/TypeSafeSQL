@@ -16,6 +16,31 @@ public class IntStreamExecutable extends StreamExecutable<Integer, IntStream> {
 		super(sql, connection, handling);
 	}
 
+	public final int getFirstResult() {
+		try {
+			try {
+				final ResultSet results = getResultSetFrom(statement);
+				if (results.next()) {
+					return results.getInt(1);
+				} else {
+					throw new NoSuchElementException();
+				}
+			} finally {
+				close();
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeSQLException(exception);
+		}
+	}
+
+	public final void forEachResult(IntConsumer action) {
+		try (
+			final IntStream stream = execute()
+		) {
+			stream.forEach(action);
+		}
+	}
+
 	@Override
 	protected final IntStream helpExecute(ResultSet results) {
 		return StreamSupport.intStream(
@@ -40,23 +65,6 @@ public class IntStreamExecutable extends StreamExecutable<Integer, IntStream> {
 			},
 			false
 		);
-	}
-
-	public final int execute() {
-		try {
-			try {
-				final ResultSet results = getResultSetFrom(statement);
-				if (results.next()) {
-					return results.getInt(1);
-				} else {
-					throw new NoSuchElementException();
-				}
-			} finally {
-				close();
-			}
-		} catch (SQLException exception) {
-			throw new RuntimeSQLException(exception);
-		}
 	}
 
 }

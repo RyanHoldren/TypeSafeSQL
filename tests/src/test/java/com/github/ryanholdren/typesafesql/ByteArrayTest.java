@@ -18,7 +18,7 @@ public class ByteArrayTest extends FunctionalTest {
 		TestByteArrayParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withInput(FIRST_EXPECTED_BYTE_ARRAY)
-			.execute();
+			.getNumberOfRowsAffected();
 	}
 
 	@Test
@@ -26,14 +26,14 @@ public class ByteArrayTest extends FunctionalTest {
 		TestNullByteArrayParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withInput(null)
-			.execute();
+			.getNumberOfRowsAffected();
 	}
 
 	@Test
 	public void testByteArrayColumn() throws Throwable {
 		final byte[] actual = TestByteArrayColumn
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertArrayEquals(FIRST_EXPECTED_BYTE_ARRAY, actual);
 	}
 
@@ -41,7 +41,7 @@ public class ByteArrayTest extends FunctionalTest {
 	public void testTwoByteArrayColumns() throws Throwable {
 		final Result actual = TestTwoByteArrayColumns
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertNotNull(actual);
 		assertArrayEquals(FIRST_EXPECTED_BYTE_ARRAY, actual.getFirstOutput());
 		assertArrayEquals(SECOND_EXPECTED_BYTE_ARRAY, actual.getSecondOutput());

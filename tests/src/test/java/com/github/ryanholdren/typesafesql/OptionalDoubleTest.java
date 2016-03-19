@@ -22,7 +22,7 @@ public class OptionalDoubleTest extends FunctionalTest {
 	public void testOptionalDoubleColumn() throws Throwable {
 		final OptionalDouble actual = TestOptionalDoubleColumn
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertEquals(FIRST_EXPECTED_DOUBLE, actual.getAsDouble(), EPSILON);
 	}
 
@@ -30,7 +30,7 @@ public class OptionalDoubleTest extends FunctionalTest {
 	public void testNullOptionalDoubleResult() throws Throwable {
 		final OptionalDouble actual = TestNullOptionalDoubleResult
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertFalse(actual.isPresent());
 	}
 
@@ -38,7 +38,7 @@ public class OptionalDoubleTest extends FunctionalTest {
 	public void testTwoOptionalDoubleColumns() throws Throwable {
 		final Result actual = TestTwoOptionalDoubleColumns
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertNotNull(actual);
 		assertEquals(FIRST_EXPECTED_DOUBLE, actual.getFirstOutput().getAsDouble(), EPSILON);
 		assertEquals(SECOND_EXPECTED_DOUBLE, actual.getSecondOutput().getAsDouble(), EPSILON);

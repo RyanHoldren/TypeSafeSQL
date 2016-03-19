@@ -19,7 +19,7 @@ public class StringTest extends FunctionalTest {
 		TestStringParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withInput(FIRST_EXPECTED_STRING)
-			.execute();
+			.getNumberOfRowsAffected();
 	}
 
 	@Test
@@ -27,14 +27,14 @@ public class StringTest extends FunctionalTest {
 		TestNullStringParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withInput(null)
-			.execute();
+			.getNumberOfRowsAffected();
 	}
 
 	@Test
 	public void testStringResult() throws Throwable {
 		final String actual = TestStringColumn
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertEquals(FIRST_EXPECTED_STRING, actual);
 	}
 
@@ -42,7 +42,7 @@ public class StringTest extends FunctionalTest {
 	public void testTwoStringColumns() throws Throwable {
 		final Result actual = TestTwoStringColumns
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertNotNull(actual);
 		assertEquals(FIRST_EXPECTED_STRING, actual.getFirstOutput());
 		assertEquals(SECOND_EXPECTED_STRING, actual.getSecondOutput());

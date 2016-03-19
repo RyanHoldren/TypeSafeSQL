@@ -20,7 +20,7 @@ public class DoubleTest extends FunctionalTest {
 		TestDoubleParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withInput(FIRST_EXPECTED_DOUBLE)
-			.execute();
+			.getNumberOfRowsAffected();
 	}
 
 	@Test
@@ -28,14 +28,14 @@ public class DoubleTest extends FunctionalTest {
 		TestNullDoubleParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withoutInput()
-			.execute();
+			.getNumberOfRowsAffected();
 	}
 
 	@Test
 	public void testDoubleColumn() throws Throwable {
 		final double actual = TestDoubleColumn
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertEquals(FIRST_EXPECTED_DOUBLE, actual, EPSILON);
 	}
 
@@ -43,7 +43,7 @@ public class DoubleTest extends FunctionalTest {
 	public void testTwoDoubleColumns() throws Throwable {
 		final Result actual = TestTwoDoubleColumns
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertNotNull(actual);
 		assertEquals(FIRST_EXPECTED_DOUBLE, actual.getFirstOutput(), EPSILON);
 		assertEquals(SECOND_EXPECTED_DOUBLE, actual.getSecondOutput(), EPSILON);

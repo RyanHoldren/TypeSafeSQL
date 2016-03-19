@@ -20,7 +20,7 @@ public class InstantTest extends FunctionalTest {
 		TestInstantParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withInput(FIRST_EXPECTED_INSTANT)
-			.execute();
+			.getNumberOfRowsAffected();
 	}
 
 	@Test
@@ -28,14 +28,14 @@ public class InstantTest extends FunctionalTest {
 		TestNullInstantParameter
 			.using(openConnection(), CLOSE_WHEN_DONE)
 			.withInput(null)
-			.execute();
+			.getNumberOfRowsAffected();
 	}
 
 	@Test
 	public void testInstantColumn() throws Throwable {
 		final Instant actual = TestInstantColumn
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertEquals(FIRST_EXPECTED_INSTANT, actual);
 	}
 
@@ -43,7 +43,7 @@ public class InstantTest extends FunctionalTest {
 	public void testTwoInstantColumns() throws Throwable {
 		final Result actual = TestTwoInstantColumns
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getFirstResult();
 		assertNotNull(actual);
 		assertEquals(FIRST_EXPECTED_INSTANT, actual.getFirstOutput());
 		assertEquals(SECOND_EXPECTED_INSTANT, actual.getSecondOutput());

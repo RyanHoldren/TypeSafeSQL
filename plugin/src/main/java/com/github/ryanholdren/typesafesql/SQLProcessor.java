@@ -103,10 +103,10 @@ public class SQLProcessor {
 		writeSQLConstant();
 		writeResultClass();
 		writeParameterInterfaces();
-		writeStartPrepareClass();
+		writeStartPreparedClass();
 		writeParameterSetters();
 		writeEndPreparedClass();
-		writePrepareMethod();
+		writeUsingMethods();
 		writeEndOfClass();
 	}
 
@@ -202,7 +202,7 @@ public class SQLProcessor {
 		arguments.writeInterfacesTo(writer, lastReturnType);
 	}
 
-	public void writeStartPrepareClass() throws IOException {
+	private void writeStartPreparedClass() throws IOException {
 		writer.write("private static final class Prepared extends ");
 		writer.write(columns.getNameOfExecutorClass());
 		final Iterator<Parameter> iterator = arguments.iterator();
@@ -227,18 +227,22 @@ public class SQLProcessor {
 		writer.writeEmptyLine();
 	}
 
-	public void writeParameterSetters() throws IOException {
+	private void writeParameterSetters() throws IOException {
 		final String lastReturnType = columns.getNameOfExecutorClass();
 		arguments.writeImplemenationOfInterfacesTo(writer, lastReturnType);
 	}
 
-	public void writeEndPreparedClass() throws IOException {
+	private void writeEndPreparedClass() throws IOException {
 		writer.writeLine('}');
 		writer.writeEmptyLine();
 	}
 
-	public void writePrepareMethod() throws IOException {
+	private void writeUsingMethods() throws IOException {
 		final String nameOfFirstInterface = getNameOfFirstInterface();
+		writer.writeLine("public static final ", nameOfFirstInterface, " using(Connection connection) {");
+		writer.writeLine("return new Prepared(connection, ConnectionHandling.CLOSE_WHEN_DONE);");
+		writer.writeLine('}');
+		writer.writeEmptyLine();
 		writer.writeLine("public static final ", nameOfFirstInterface, " using(Connection connection, ConnectionHandling handling) {");
 		writer.writeLine("return new Prepared(connection, handling);");
 		writer.writeLine('}');

@@ -27,7 +27,7 @@ public class FunctionalTest {
 			}));
 			CreateAssertFunction
 				.using(openConnection(), CLOSE_WHEN_DONE)
-				.execute();
+				.getNumberOfRowsAffected();
 		} catch (Throwable exception) {
 			throw new ExceptionInInitializerError(exception);
 		}
@@ -42,7 +42,7 @@ public class FunctionalTest {
 		try {
 			TestAssertShouldFail
 				.using(openConnection(), CLOSE_WHEN_DONE)
-				.execute();
+				.getNumberOfRowsAffected();
 			fail("Should have thrown an exception!");
 		} catch (RuntimeSQLException exception) {
 			final String message = exception.getMessage();
@@ -54,7 +54,7 @@ public class FunctionalTest {
 	public void testUpdate() throws Throwable {
 		final int rowsAffected = TestUpdate
 			.using(openConnection(), CLOSE_WHEN_DONE)
-			.execute();
+			.getNumberOfRowsAffected();
 		assertEquals(0, rowsAffected);
 	}
 
