@@ -60,10 +60,10 @@ public class SQLProcessor {
 			return this;
 		}
 
-		public void preprocess() throws IOException {
+		public void process() throws IOException {
 			try {
 				try {
-					new SQLProcessor(this).preprocess();
+					new SQLProcessor(this).process();
 				} finally {
 					writer.close();
 				}
@@ -96,11 +96,12 @@ public class SQLProcessor {
 		this.writer = builder.writer;
 	}
 
-	public void preprocess() throws IOException {
+	public void process() throws IOException {
 		writeNamespace();
 		writeImports();
 		writeStartOfClass();
 		writeSQLConstant();
+		writeFactory();
 		writeResultClass();
 		writeParameterInterfaces();
 		writeStartPreparedClass();
@@ -131,6 +132,14 @@ public class SQLProcessor {
 
 	private void writeStartOfClass() throws IOException {
 		writer.writeLine("public final class ", className, " {");
+		writer.writeEmptyLine();
+	}
+
+	private void writeFactory() throws IOException {
+		writer.writeLine("public interface Factory {");
+		final String nameOfFirstInterface = getNameOfFirstInterface();
+		writer.writeLine(nameOfFirstInterface, " using(Connection connection, ConnectionHandling handling);");
+		writer.writeLine("}");
 		writer.writeEmptyLine();
 	}
 
@@ -239,10 +248,6 @@ public class SQLProcessor {
 
 	private void writeUsingMethods() throws IOException {
 		final String nameOfFirstInterface = getNameOfFirstInterface();
-		writer.writeLine("public static final ", nameOfFirstInterface, " using(Connection connection) {");
-		writer.writeLine("return new Prepared(connection, ConnectionHandling.CLOSE_WHEN_DONE);");
-		writer.writeLine('}');
-		writer.writeEmptyLine();
 		writer.writeLine("public static final ", nameOfFirstInterface, " using(Connection connection, ConnectionHandling handling) {");
 		writer.writeLine("return new Prepared(connection, handling);");
 		writer.writeLine('}');

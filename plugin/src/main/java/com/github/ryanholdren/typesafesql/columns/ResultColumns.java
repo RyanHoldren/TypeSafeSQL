@@ -39,7 +39,7 @@ public class ResultColumns {
 		if (columns.size() < 2) {
 			return;
 		}
-		writer.writeLine("public static final class Result {");
+		writer.writeLine("public static class Result {");
 		writer.writeEmptyLine();
 		for (ResultColumn column : columns.values()) {
 			column.writeFieldTo(writer);

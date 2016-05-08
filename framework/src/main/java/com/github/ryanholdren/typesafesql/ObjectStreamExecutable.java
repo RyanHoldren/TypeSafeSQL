@@ -16,7 +16,7 @@ public abstract class ObjectStreamExecutable<T> extends StreamExecutable<T, Stre
 		super(sql, connection, handling);
 	}
 
-	public final T getFirstResult() {
+	public T getFirstResult() {
 		try {
 			try {
 				final ResultSet results = getResultSetFrom(statement);
@@ -33,7 +33,7 @@ public abstract class ObjectStreamExecutable<T> extends StreamExecutable<T, Stre
 		}
 	}
 
-	public final void forEachResult(Consumer<T> action) {
+	public void forEachResult(Consumer<T> action) {
 		try (
 			final Stream<T> stream = execute()
 		) {

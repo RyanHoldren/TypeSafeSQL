@@ -96,7 +96,7 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 									.setClassName(className)
 									.setReader(sqlPath)
 									.setWriter(javaPath)
-									.preprocess();
+									.process();
 							} catch (Exception exception) {
 								log.error("Encounted exception while processing '" + sqlPath + "':", exception);
 							}

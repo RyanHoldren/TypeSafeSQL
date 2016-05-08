@@ -7,13 +7,18 @@ class BooleanResultColumn extends ResultColumn {
 	}
 
 	@Override
+	protected String getNameOfGetterInResultSet() {
+		return "getBoolean";
+	}
+
+	@Override
 	public String getNameOfJavaType() {
 		return "boolean";
 	}
 
 	@Override
 	public String getNameOfResultWhenThisIsTheOnlyColumn() {
-		throw new UnsupportedOperationException("If there is only one column in the result, that column cannot be a boolean!");
+		return "BooleanStreamExecutable";
 	}
 
 }
