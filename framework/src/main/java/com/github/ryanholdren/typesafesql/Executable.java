@@ -36,7 +36,7 @@ public abstract class Executable {
 		X accept(PreparedStatement statement) throws SQLException;
 	}
 
-	protected final <X> X safelyUseStatement(PreparedStatementConsumer<X> action) {
+	protected <X> X safelyUseStatement(PreparedStatementConsumer<X> action) {
 		try {
 			try {
 				return action.accept(statement);
@@ -59,7 +59,7 @@ public abstract class Executable {
 		}
 	}
 
-	protected final void close() throws SQLException {
+	protected void close() throws SQLException {
 		try {
 			statement.close();
 		} finally {

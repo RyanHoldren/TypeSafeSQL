@@ -16,7 +16,7 @@ public class LongStreamExecutable extends StreamExecutable<Long, LongStream> {
 		super(sql, connection, handling);
 	}
 
-	public final long getFirstResult() {
+	public long getFirstResult() {
 		try {
 			try {
 				final ResultSet results = getResultSetFrom(statement);
@@ -33,7 +33,7 @@ public class LongStreamExecutable extends StreamExecutable<Long, LongStream> {
 		}
 	}
 
-	public final void forEachResult(LongConsumer action) {
+	public void forEachResult(LongConsumer action) {
 		try (
 			final LongStream stream = execute()
 		) {

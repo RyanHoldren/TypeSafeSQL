@@ -42,7 +42,7 @@ public abstract class ObjectStreamExecutable<T> extends StreamExecutable<T, Stre
 	}
 
 	@Override
-	protected final Stream<T> helpExecute(ResultSet results) {
+	protected Stream<T> helpExecute(ResultSet results) {
 		return StreamSupport.stream(
 			new Spliterators.AbstractSpliterator<T>(
 				Long.MAX_VALUE,

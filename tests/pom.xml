@@ -1,57 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.github.ryanholdren.typesafesql</groupId>
-    <artifactId>parent</artifactId>
-    <version>2016-04-29</version>
-  </parent>
-  <artifactId>tests</artifactId>
-  <name>TypeSafeSQL Tests</name>
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.github.ryanholdren.typesafesql</groupId>
+		<artifactId>parent</artifactId>
+		<version>2016-06-09</version>
+	</parent>
+	<artifactId>tests</artifactId>
+	<name>TypeSafeSQL Tests</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.opentable.components</groupId>
-      <artifactId>otj-pg-embedded</artifactId>
-      <version>0.4.4</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.ryanholdren.typesafesql</groupId>
-      <artifactId>framework</artifactId>
-      <version>2016-04-29</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>2.0.31-beta</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.opentable.components</groupId>
+			<artifactId>otj-pg-embedded</artifactId>
+			<version>0.4.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ryanholdren.typesafesql</groupId>
+			<artifactId>framework</artifactId>
+			<version>2016-06-09</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>2.0.31-beta</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
+	<build>
+		<plugins>
+			<plugin>
 	<groupId>com.github.ryanholdren.typesafesql</groupId>
 	<artifactId>plugin</artifactId>
-	<version>2016-04-29</version>
+	<version>2016-06-09</version>
 	<executions>
-	  <execution>
-	    <goals>
-	      <goal>process-test-sql</goal>
-	    </goals>
-	  </execution>
+		<execution>
+			<goals>
+				<goal>process-test-sql</goal>
+			</goals>
+		</execution>
 	</executions>
-      </plugin>
-    </plugins>
-  </build>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

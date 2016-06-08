@@ -11,7 +11,7 @@ public class ByteArrayStreamExecutable extends ObjectStreamExecutable<byte[]> {
 	}
 
 	@Override
-	protected final byte[] read(ResultSet results) throws SQLException {
+	protected byte[] read(ResultSet results) throws SQLException {
 		return results.getBytes(1);
 	}
 

@@ -11,7 +11,7 @@ public class BooleanStreamExecutable extends ObjectStreamExecutable<Boolean> {
 	}
 
 	@Override
-	protected final Boolean read(ResultSet results) throws SQLException {
+	protected Boolean read(ResultSet results) throws SQLException {
 		final boolean result = results.getBoolean(1);
 		if (results.wasNull()) {
 			return null;

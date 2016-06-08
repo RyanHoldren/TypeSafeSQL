@@ -3,7 +3,7 @@ package com.github.ryanholdren.typesafesql.columns;
 import com.github.ryanholdren.typesafesql.AutoIndentingWriter;
 import java.io.IOException;
 
-class OptionalLongResultColumn  extends ResultColumn {
+class OptionalLongResultColumn extends ResultColumn {
 
 	public OptionalLongResultColumn(int indexInResultSet, String name) {
 		super(indexInResultSet, name);

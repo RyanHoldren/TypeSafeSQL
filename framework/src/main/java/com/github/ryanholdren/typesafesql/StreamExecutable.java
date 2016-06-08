@@ -10,7 +10,7 @@ import java.util.stream.BaseStream;
 
 public abstract class StreamExecutable<T, S extends BaseStream<T, S>> extends Executable {
 
-	protected static final ResultSet getResultSetFrom(PreparedStatement statement) throws SQLException {
+	protected static ResultSet getResultSetFrom(PreparedStatement statement) throws SQLException {
 		boolean isResultSet = statement.execute();
 		do {
 			if (isResultSet) {
@@ -25,7 +25,7 @@ public abstract class StreamExecutable<T, S extends BaseStream<T, S>> extends Ex
 		super(sql, connection, handling);
 	}
 
-	public final <X> X execute(Function<S, X> action) {
+	public <X> X execute(Function<S, X> action) {
 		try (
 			final S stream = execute()
 		) {
@@ -33,7 +33,7 @@ public abstract class StreamExecutable<T, S extends BaseStream<T, S>> extends Ex
 		}
 	}
 
-	public final void execute(Consumer<S> action) {
+	public void execute(Consumer<S> action) {
 		try (
 			final S stream = execute()
 		) {
@@ -41,7 +41,7 @@ public abstract class StreamExecutable<T, S extends BaseStream<T, S>> extends Ex
 		}
 	}
 
-	public final S execute() {
+	public S execute() {
 		return safelyUseStatement(statement -> {
 			final ResultSet results = getResultSetFrom(statement);
 			final Runnable cleanup = () -> {

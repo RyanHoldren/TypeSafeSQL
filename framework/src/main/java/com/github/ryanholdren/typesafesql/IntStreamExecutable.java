@@ -16,7 +16,7 @@ public class IntStreamExecutable extends StreamExecutable<Integer, IntStream> {
 		super(sql, connection, handling);
 	}
 
-	public final int getFirstResult() {
+	public int getFirstResult() {
 		try {
 			try {
 				final ResultSet results = getResultSetFrom(statement);
@@ -33,7 +33,7 @@ public class IntStreamExecutable extends StreamExecutable<Integer, IntStream> {
 		}
 	}
 
-	public final void forEachResult(IntConsumer action) {
+	public void forEachResult(IntConsumer action) {
 		try (
 			final IntStream stream = execute()
 		) {
@@ -42,7 +42,7 @@ public class IntStreamExecutable extends StreamExecutable<Integer, IntStream> {
 	}
 
 	@Override
-	protected final IntStream helpExecute(ResultSet results) {
+	protected IntStream helpExecute(ResultSet results) {
 		return StreamSupport.intStream(
 			new Spliterators.AbstractIntSpliterator(
 				Long.MAX_VALUE,

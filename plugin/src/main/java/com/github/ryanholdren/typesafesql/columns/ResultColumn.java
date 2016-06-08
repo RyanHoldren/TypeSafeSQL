@@ -38,6 +38,7 @@ public abstract class ResultColumn {
 	public void writeGetterTo(AutoIndentingWriter writer) throws IOException {
 		final String nameOfJavaType = getNameOfJavaType();
 		final String capitalizedName = capitalize(name);
+		writer.writeLine("@ColumnPosition(", indexInResultSet, ")");
 		writer.writeLine("public ", nameOfJavaType, " get", capitalizedName, "() {");
 		writer.writeLine("return ", name, ';');
 		writer.writeLine('}');

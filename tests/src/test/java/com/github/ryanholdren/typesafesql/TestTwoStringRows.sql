@@ -1,3 +1,3 @@
-  SELECT 'Bees?' AS {out:VARCHAR:output}
+	SELECT 'Bees?' AS {out:VARCHAR:output}
 UNION ALL
-  SELECT 'Here be dragons!';
+	SELECT 'Here be dragons!';

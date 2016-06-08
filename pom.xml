@@ -1,106 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.github.ryanholdren.typesafesql</groupId>
-  <artifactId>parent</artifactId>
-  <version>2016-04-29</version>
-  <packaging>pom</packaging>
-  <name>TypeSafeSQL</name>
-  <description>A Maven plugin for preprocessing SQL files into type-safe Java classes.</description>
-  <url>https://github.com/RyanHoldren/TypeSafeSQL</url>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.github.ryanholdren.typesafesql</groupId>
+	<artifactId>parent</artifactId>
+	<version>2016-06-09</version>
+	<packaging>pom</packaging>
+	<name>TypeSafeSQL</name>
+	<description>A Maven plugin for preprocessing SQL files into type-safe Java classes.</description>
+	<url>https://github.com/RyanHoldren/TypeSafeSQL</url>
 
-  <licenses>
-    <license>
-      <name>MIT License</name>
-      <url>http://www.opensource.org/licenses/mit-license.php</url>
-    </license>
-  </licenses>
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
 
-  <developers>
-    <developer>
-      <name>Ryan C. Holdren</name>
-      <email>ryan.c.holdren@gmail.com</email>
-      <url>https://github.com/RyanHoldren/</url>
-    </developer>
-  </developers>
+	<developers>
+		<developer>
+			<name>Ryan C. Holdren</name>
+			<email>ryan.c.holdren@gmail.com</email>
+			<url>https://github.com/RyanHoldren/</url>
+		</developer>
+	</developers>
 
-  <scm>
-    <connection>scm:git:git@github.com:RyanHoldren/TypeSafeSQL.git</connection>
-    <developerConnection>scm:git:git@github.com:RyanHoldren/TypeSafeSQL.git</developerConnection>
-    <url>git@github.com:RyanHoldren/TypeSafeSQL.git</url>
-  </scm>
+	<scm>
+		<connection>scm:git:git@github.com:RyanHoldren/TypeSafeSQL.git</connection>
+		<developerConnection>scm:git:git@github.com:RyanHoldren/TypeSafeSQL.git</developerConnection>
+		<url>git@github.com:RyanHoldren/TypeSafeSQL.git</url>
+	</scm>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-  </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
 
-  <modules>
-    <module>plugin</module>
-    <module>framework</module>
-    <module>tests</module>
-  </modules>
+	<modules>
+		<module>plugin</module>
+		<module>framework</module>
+		<module>tests</module>
+	</modules>
 
-  <profiles>
-    <profile>
-      <id>release</id>
-      <build>
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
 	<plugins>
-	  <plugin>
-	    <groupId>org.apache.maven.plugins</groupId>
-	    <artifactId>maven-source-plugin</artifactId>
-	    <version>2.2.1</version>
-	    <executions>
-	      <execution>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-source-plugin</artifactId>
+			<version>2.2.1</version>
+			<executions>
+				<execution>
 		<id>attach-sources</id>
 		<goals>
-		  <goal>jar-no-fork</goal>
+			<goal>jar-no-fork</goal>
 		</goals>
-	      </execution>
-	    </executions>
-	  </plugin>
-	  <plugin>
-	    <groupId>org.apache.maven.plugins</groupId>
-	    <artifactId>maven-javadoc-plugin</artifactId>
-	    <version>2.9.1</version>
-	    <executions>
-	      <execution>
+				</execution>
+			</executions>
+		</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-javadoc-plugin</artifactId>
+			<version>2.9.1</version>
+			<executions>
+				<execution>
 		<id>attach-javadocs</id>
 		<goals>
-		  <goal>jar</goal>
+			<goal>jar</goal>
 		</goals>
-	      </execution>
-	    </executions>
-	  </plugin>
-	  <plugin>
-	    <groupId>org.apache.maven.plugins</groupId>
-	    <artifactId>maven-gpg-plugin</artifactId>
-	    <version>1.5</version>
-	    <executions>
-	      <execution>
+				</execution>
+			</executions>
+		</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-gpg-plugin</artifactId>
+			<version>1.5</version>
+			<executions>
+				<execution>
 		<id>sign-artifacts</id>
 		<phase>verify</phase>
 		<goals>
-		  <goal>sign</goal>
+			<goal>sign</goal>
 		</goals>
-	      </execution>
-	    </executions>
-	  </plugin>
+				</execution>
+			</executions>
+		</plugin>
 	</plugins>
-      </build>
-      <distributionManagement>
+			</build>
+			<distributionManagement>
 	<snapshotRepository>
-	  <id>ossrh</id>
-	  <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		<id>ossrh</id>
+		<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 	</snapshotRepository>
 	<repository>
-	  <id>ossrh</id>
-	  <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		<id>ossrh</id>
+		<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 	</repository>
-      </distributionManagement>
-    </profile>
-  </profiles>
+			</distributionManagement>
+		</profile>
+	</profiles>
 
 </project>

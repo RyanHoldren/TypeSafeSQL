@@ -12,7 +12,7 @@ public abstract class Parameter {
 
 	private final String name;
 	private final String capitalizedName;
-	private final HashSet<Integer> positions =  new HashSet<>();
+	private final HashSet<Integer> positions = new HashSet<>();
 
 	private final String argumentType = getArgumentType();
 	private final String nameOfJDBCConstant = getNameOfJDBCConstant();

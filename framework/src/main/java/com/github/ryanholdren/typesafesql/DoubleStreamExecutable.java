@@ -16,7 +16,7 @@ public class DoubleStreamExecutable extends StreamExecutable<Double, DoubleStrea
 		super(sql, connection, handling);
 	}
 
-	public final double getFirstResult() {
+	public double getFirstResult() {
 		try {
 			try {
 				final ResultSet results = getResultSetFrom(statement);
@@ -33,7 +33,7 @@ public class DoubleStreamExecutable extends StreamExecutable<Double, DoubleStrea
 		}
 	}
 
-	public final void forEachResult(DoubleConsumer action) {
+	public void forEachResult(DoubleConsumer action) {
 		try (
 			final DoubleStream stream = execute()
 		) {
@@ -42,7 +42,7 @@ public class DoubleStreamExecutable extends StreamExecutable<Double, DoubleStrea
 	}
 
 	@Override
-	protected final DoubleStream helpExecute(ResultSet results) {
+	protected DoubleStream helpExecute(ResultSet results) {
 		return StreamSupport.doubleStream(
 			new Spliterators.AbstractDoubleSpliterator(
 				Long.MAX_VALUE,

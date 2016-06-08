@@ -11,7 +11,7 @@ public class StringStreamExecutable extends ObjectStreamExecutable<String> {
 	}
 
 	@Override
-	protected final String read(ResultSet results) throws SQLException {
+	protected String read(ResultSet results) throws SQLException {
 		return results.getString(1);
 	}
 

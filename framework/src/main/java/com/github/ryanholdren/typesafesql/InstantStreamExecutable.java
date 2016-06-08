@@ -12,7 +12,7 @@ public class InstantStreamExecutable extends ObjectStreamExecutable<Instant> {
 	}
 
 	@Override
-	protected final Instant read(ResultSet results) throws SQLException {
+	protected Instant read(ResultSet results) throws SQLException {
 		return results.getTimestamp(1).toInstant();
 	}
 
