@@ -1,0 +1,1 @@
+SELECT ASSERT({in:BOOLEAN:input} IS NULL);

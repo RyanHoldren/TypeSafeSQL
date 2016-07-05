@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.github.ryanholdren.typesafesql</groupId>
 		<artifactId>parent</artifactId>
-		<version>2016-06-09</version>
+		<version>2016-07-05</version>
 	</parent>
 	<artifactId>plugin</artifactId>
 	<name>TypeSafeSQL Plugin</name>
@@ -35,15 +35,15 @@
 	<build>
 		<plugins>
 			<plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-plugin-plugin</artifactId>
-	<version>3.4</version>
-	<executions>
-		<execution>
-			<id>default-descriptor</id>
-			<phase>process-classes</phase>
-		</execution>
-	</executions>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>3.4</version>
+				<executions>
+					<execution>
+						<id>default-descriptor</id>
+						<phase>process-classes</phase>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

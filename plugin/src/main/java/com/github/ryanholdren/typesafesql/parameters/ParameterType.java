@@ -42,6 +42,13 @@ public enum ParameterType {
 		public InstantParameter createParameter(String name) {
 			return new InstantParameter(name);
 		}
+	},
+
+	BOOLEAN {
+		@Override
+		public BooleanParameter createParameter(String name) {
+			return new BooleanParameter(name);
+		}
 	};
 
 	public abstract Parameter createParameter(String name);
