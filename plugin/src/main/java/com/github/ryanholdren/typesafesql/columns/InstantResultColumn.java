@@ -2,6 +2,7 @@ package com.github.ryanholdren.typesafesql.columns;
 
 import com.github.ryanholdren.typesafesql.AutoIndentingWriter;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 class InstantResultColumn extends ResultColumn {
 
@@ -13,6 +14,12 @@ class InstantResultColumn extends ResultColumn {
 	public void writeSetFieldTo(AutoIndentingWriter writer) throws IOException {
 		writer.writeLine("final Timestamp ", name, " = results.getTimestamp(", indexInResultSet, ");");
 		writer.writeLine("this.", name, " = ", "results.wasNull() ? null : ", name, ".toInstant();");
+	}
+
+	@Override
+	public void forEachRequiredImport(Consumer<String> action, boolean isNotMocking) {
+		action.accept("java.sql.Timestamp");
+		action.accept("java.time.Instant");
 	}
 
 	@Override

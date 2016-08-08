@@ -1,9 +1,11 @@
 package com.github.ryanholdren.typesafesql.columns;
 
 import com.github.ryanholdren.typesafesql.AutoIndentingWriter;
+import com.github.ryanholdren.typesafesql.RequiresImports;
 import java.io.IOException;
+import java.util.function.Consumer;
 
-public abstract class ResultColumn {
+public abstract class ResultColumn implements RequiresImports {
 
 	public static String capitalize(String word) {
 		return Character.toUpperCase(word.charAt(0)) + word.substring(1);
@@ -17,8 +19,25 @@ public abstract class ResultColumn {
 		this.name = name;
 	}
 
+	public String getName() {
+		return name;
+	}
+
 	protected abstract String getNameOfJavaType();
 	public abstract String getNameOfResultWhenThisIsTheOnlyColumn();
+
+	@Override
+	public void forEachRequiredImport(Consumer<String> action, boolean isNotMocking) {
+
+	}
+
+	public String getTypeOfResultMockerWhenThisIsTheOnlyColumn() {
+		return "ObjectStreamExecutableMocker<" + getNameOfJavaType() + ">";
+	}
+
+	public String getClassOfResultMockerWhenThisIsTheOnlyColumn() {
+		return "ObjectStreamExecutableMocker";
+	}
 
 	public void writeFieldTo(AutoIndentingWriter writer) throws IOException {
 		final String nameOfJavaType = getNameOfJavaType();

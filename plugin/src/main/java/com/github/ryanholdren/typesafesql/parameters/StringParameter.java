@@ -22,7 +22,7 @@ class StringParameter extends Parameter {
 	}
 
 	@Override
-	protected String getArgumentType() {
+	public String getArgumentType() {
 		return "String";
 	}
 

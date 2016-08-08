@@ -1,5 +1,7 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
+import java.util.function.Consumer;
+
 class InstantParameter extends Parameter {
 
 	public InstantParameter(String argumentName) {
@@ -27,8 +29,17 @@ class InstantParameter extends Parameter {
 	}
 
 	@Override
-	protected String getArgumentType() {
+	public String getArgumentType() {
 		return "Instant";
+	}
+
+	@Override
+	public void forEachRequiredImport(Consumer<String> action, boolean isNotMocking) {
+		super.forEachRequiredImport(action, isNotMocking);
+		if (isNotMocking) {
+			action.accept("java.sql.Timestamp");
+		}
+		action.accept("java.time.Instant");
 	}
 
 }

@@ -21,4 +21,9 @@ class BooleanResultColumn extends ResultColumn {
 		return "BooleanStreamExecutable";
 	}
 
+	@Override
+	public String getTypeOfResultMockerWhenThisIsTheOnlyColumn() {
+		return "ObjectStreamExecutableMocker<Boolean>";
+	}
+
 }

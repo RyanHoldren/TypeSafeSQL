@@ -22,7 +22,7 @@ class BooleanParameter extends Parameter {
 	}
 
 	@Override
-	protected String getArgumentType() {
+	public String getArgumentType() {
 		return "boolean";
 	}
 

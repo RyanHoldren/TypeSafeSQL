@@ -22,7 +22,7 @@ class DoubleParameter extends Parameter {
 	}
 
 	@Override
-	protected String getArgumentType() {
+	public String getArgumentType() {
 		return "double";
 	}
 

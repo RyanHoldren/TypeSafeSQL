@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.github.ryanholdren.typesafesql</groupId>
 		<artifactId>parent</artifactId>
-		<version>2016-07-05</version>
+		<version>2016-08-07</version>
 	</parent>
 	<artifactId>plugin</artifactId>
 	<name>TypeSafeSQL Plugin</name>
@@ -29,6 +29,11 @@
 			<artifactId>maven-plugin-annotations</artifactId>
 			<version>3.4</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
 		</dependency>
 	</dependencies>
 

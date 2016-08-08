@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.ryanholdren.typesafesql</groupId>
 	<artifactId>parent</artifactId>
-	<version>2016-07-05</version>
+	<version>2016-08-07</version>
 	<packaging>pom</packaging>
 	<name>TypeSafeSQL</name>
 	<description>A Maven plugin for preprocessing SQL files into type-safe Java classes.</description>
@@ -41,6 +41,7 @@
 		<module>plugin</module>
 		<module>framework</module>
 		<module>tests</module>
+		<module>mocking</module>
 	</modules>
 
 	<profiles>

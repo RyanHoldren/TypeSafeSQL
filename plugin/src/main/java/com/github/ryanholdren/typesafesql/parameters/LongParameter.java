@@ -22,7 +22,7 @@ class LongParameter extends Parameter {
 	}
 
 	@Override
-	protected String getArgumentType() {
+	public String getArgumentType() {
 		return "long";
 	}
 

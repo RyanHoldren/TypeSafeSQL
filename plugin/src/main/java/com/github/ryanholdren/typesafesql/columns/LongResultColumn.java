@@ -16,4 +16,9 @@ class LongResultColumn extends ResultColumn {
 		return "LongStreamExecutable";
 	}
 
+	@Override
+	public String getTypeOfResultMockerWhenThisIsTheOnlyColumn() {
+		return "LongStreamExecutableMocker";
+	}
+
 }

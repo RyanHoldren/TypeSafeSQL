@@ -1,10 +1,12 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
 import com.github.ryanholdren.typesafesql.AutoIndentingWriter;
+import com.github.ryanholdren.typesafesql.RequiresImports;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.function.Consumer;
 
-public abstract class Parameter {
+public abstract class Parameter implements RequiresImports {
 
 	public static String capitalize(String word) {
 		return Character.toUpperCase(word.charAt(0)) + word.substring(1);
@@ -13,7 +15,6 @@ public abstract class Parameter {
 	private final String name;
 	private final String capitalizedName;
 	private final HashSet<Integer> positions = new HashSet<>();
-
 	private final String argumentType = getArgumentType();
 	private final String nameOfJDBCConstant = getNameOfJDBCConstant();
 	private final boolean isNotAllowedToBeNull = isNullable() == false;
@@ -27,8 +28,27 @@ public abstract class Parameter {
 		positions.add(position);
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public String getCapitalizedName() {
+		return capitalizedName;
+	}
+
 	public String getNameOfInterface() {
 		return "Needs" + capitalizedName;
+	}
+
+	public String getNameOfMock() {
+		return "needs" + capitalizedName;
+	}
+
+	@Override
+	public void forEachRequiredImport(Consumer<String> action, boolean isNotMocking) {
+		if (isNotMocking) {
+			action.accept("java.sql.Types");
+		}
 	}
 
 	public void writeInterfaceTo(AutoIndentingWriter writer, String returnType) throws IOException {
@@ -88,6 +108,6 @@ public abstract class Parameter {
 	protected abstract boolean isNullable();
 	protected abstract String getNameOfMethodInPreparedStatement();
 	protected abstract String getNameOfJDBCConstant();
-	protected abstract String getArgumentType();
+	public abstract String getArgumentType();
 
 }

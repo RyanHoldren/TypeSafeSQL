@@ -16,4 +16,9 @@ class DoubleResultColumn extends ResultColumn {
 		return "DoubleStreamExecutable";
 	}
 
+	@Override
+	public String getTypeOfResultMockerWhenThisIsTheOnlyColumn() {
+		return "DoubleStreamExecutableMocker";
+	}
+
 }

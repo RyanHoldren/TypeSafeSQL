@@ -2,6 +2,7 @@ package com.github.ryanholdren.typesafesql.columns;
 
 import com.github.ryanholdren.typesafesql.AutoIndentingWriter;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 class OptionalLongResultColumn extends ResultColumn {
 
@@ -18,6 +19,11 @@ class OptionalLongResultColumn extends ResultColumn {
 	@Override
 	public String getNameOfJavaType() {
 		return "OptionalLong";
+	}
+
+	@Override
+	public void forEachRequiredImport(Consumer<String> action, boolean isNotMocking) {
+		action.accept("java.util.OptionalLong");
 	}
 
 	@Override

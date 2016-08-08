@@ -16,4 +16,9 @@ class IntegerResultColumn extends ResultColumn {
 		return "IntStreamExecutable";
 	}
 
+	@Override
+	public String getTypeOfResultMockerWhenThisIsTheOnlyColumn() {
+		return "IntStreamExecutableMocker";
+	}
+
 }

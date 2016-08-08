@@ -71,12 +71,13 @@ Add the TypeSafeSQL plugin to your ```pom.xml```:
 <plugin>
 	<groupId>com.github.ryanholdren.typesafesql</groupId>
 	<artifactId>plugin</artifactId>
-	<version>2016-07-05</version>
+	<version>2016-08-07</version>
 	<executions>
 		<execution>
 			<goals>
-				<goal>process-sql</goal>
-				<goal>process-test-sql</goal>
+				<goal>write-classes-from-sql</goal>
+				<goal>write-classes-from-test-sql</goal>
+				<goal>write-mocking-classes-from-sql</goal>
 			</goals>
 		</execution>
 	</executions>
@@ -87,6 +88,12 @@ Also add a dependency on the TypeSafeSQL's framework classes:
 <dependency>
 	<groupId>com.github.ryanholdren.typesafesql</groupId>
 	<artifactId>framework</artifactId>
-	<version>2016-07-05</version>
+	<version>2016-08-07</version>
+</dependency>
+<dependency>
+	<groupId>com.github.ryanholdren.typesafesql</groupId>
+	<artifactId>mocking</artifactId>
+	<version>2016-08-07</version>
+	<scope>test</scope>
 </dependency>
 ```

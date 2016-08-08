@@ -2,6 +2,7 @@ package com.github.ryanholdren.typesafesql.columns;
 
 import com.github.ryanholdren.typesafesql.AutoIndentingWriter;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 class OptionalDoubleResultColumn extends ResultColumn {
 
@@ -18,6 +19,11 @@ class OptionalDoubleResultColumn extends ResultColumn {
 	@Override
 	public String getNameOfJavaType() {
 		return "OptionalDouble";
+	}
+
+	@Override
+	public void forEachRequiredImport(Consumer<String> action, boolean isNotMocking) {
+		action.accept("java.util.OptionalDouble");
 	}
 
 	@Override
