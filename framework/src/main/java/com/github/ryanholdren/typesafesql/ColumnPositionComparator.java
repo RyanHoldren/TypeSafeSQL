@@ -6,10 +6,10 @@ import java.util.Comparator;
 
 public class ColumnPositionComparator implements Comparator<Method> {
 
-	private static final ColumnPositionComparator instance = new ColumnPositionComparator();
+	private static final ColumnPositionComparator INSTANCE = new ColumnPositionComparator();
 
 	public static ColumnPositionComparator getInstance() {
-		return instance;
+		return INSTANCE;
 	}
 
 	private ColumnPositionComparator() {}
@@ -20,11 +20,70 @@ public class ColumnPositionComparator implements Comparator<Method> {
 	}
 
 	private int getColumnPositionOf(Method method) {
-		final ColumnPosition position = method.getAnnotation(ColumnPosition.class);
-		if (position == null) {
-			return MAX_VALUE;
+		return new Finder(method).find();
+	}
+
+	private class Finder {
+
+		private final Method method;
+		private final Class<?> clazz;
+
+		private Finder(Method method) {
+			this.method = method;
+			this.clazz = method.getDeclaringClass();
 		}
-		return position.value();
+
+		private int find() {
+			ColumnPosition position = fromMethod();
+			if (position == null) {
+				position = fromInterfaces();
+			}
+			if (position == null) {
+				position = fromSuperclasses();
+			}
+			if (position == null) {
+				return MAX_VALUE;
+			}
+			return position.value();
+		}
+
+		private ColumnPosition fromMethod() {
+			final ColumnPosition position = method.getAnnotation(ColumnPosition.class);
+			if (position == null) {
+				return null;
+			}
+			return position;
+		}
+
+		private ColumnPosition fromSuperclasses() {
+			for (Class<?> interfaze : clazz.getInterfaces()) {
+				try {
+					final Method equivalentMethod = interfaze.getDeclaredMethod(method.getName(), method.getParameterTypes());
+					final ColumnPosition position = equivalentMethod.getAnnotation(ColumnPosition.class);
+					if (position != null) {
+						return position;
+					}
+				} catch (NoSuchMethodException | SecurityException exception) {}
+			}
+			return null;
+		}
+
+		private ColumnPosition fromInterfaces() {
+			Class<?> subclass = method.getDeclaringClass();
+			while (true) {
+				subclass = subclass.getSuperclass();
+				if (subclass == null || Object.class == subclass) {
+					return null;
+				}
+				try {
+					final Method equivalentMethod = subclass.getDeclaredMethod(method.getName(), method.getParameterTypes());
+					final ColumnPosition position = equivalentMethod.getAnnotation(ColumnPosition.class);
+					if (position != null) {
+						return position;
+					}
+				} catch (NoSuchMethodException | SecurityException exception) {}
+			}
+		}
 	}
 
 }

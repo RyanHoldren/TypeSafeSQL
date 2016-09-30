@@ -54,11 +54,18 @@ public abstract class ResultColumn implements RequiresImports {
 		return "get" + capitalize(nameOfJavaType);
 	}
 
-	public void writeGetterTo(AutoIndentingWriter writer) throws IOException {
+	public void writeGetterDefinitionTo(AutoIndentingWriter writer) throws IOException {
 		final String nameOfJavaType = getNameOfJavaType();
 		final String capitalizedName = capitalize(name);
 		writer.writeLine("@ColumnPosition(", indexInResultSet, ")");
-		writer.writeLine("public ", nameOfJavaType, " get", capitalizedName, "() {");
+		writer.writeLine(nameOfJavaType, " get", capitalizedName, "();");
+	}
+
+	public void writeGetterTo(AutoIndentingWriter writer) throws IOException {
+		final String nameOfJavaType = getNameOfJavaType();
+		final String capitalizedName = capitalize(name);
+		writer.writeLine("@Override");
+		writer.writeLine("public final ", nameOfJavaType, " get", capitalizedName, "() {");
 		writer.writeLine("return ", name, ';');
 		writer.writeLine('}');
 	}

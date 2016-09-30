@@ -29,7 +29,11 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		writeImports();
 		writeStartOfClass();
 		writeSQLConstant();
-		writeResultClass();
+		if (sql.needsResultClass()) {
+			writeResultInterface();
+			writeResultClass();
+			writeResultStreamExecutable();
+		}
 		writeParameterInterfaces();
 		writeStartPreparedClass();
 		writeParameterSetters();
@@ -95,40 +99,52 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		throw new IllegalStateException("Should always match something, even if it's an empty string!");
 	}
 
+	public void writeResultInterface() throws IOException {
+		writer.writeLine("public interface Result {");
+		writer.writeEmptyLine();
+		sql.forEachColumn(column -> {
+			column.writeGetterDefinitionTo(writer);
+			writer.writeEmptyLine();
+		});
+		writer.writeLine('}');
+		writer.writeEmptyLine();
+	}
+
 	public void writeResultClass() throws IOException {
-		if (sql.needsResultClass()) {
-			writer.writeLine("public static class Result {");
+			writer.writeLine("private static final class ResultImpl implements Result {");
+		writer.writeEmptyLine();
+		sql.forEachColumn(column -> {
+			column.writeFieldTo(writer);
+		});
+		writer.writeEmptyLine();
+		writer.writeLine("private ResultImpl(ResultSet results) throws SQLException {");
+		sql.forEachColumn(column -> {
+			column.writeSetFieldTo(writer);
+		});
+		writer.writeLine('}');
+		writer.writeEmptyLine();
+		sql.forEachColumn(column -> {
+			column.writeGetterTo(writer);
 			writer.writeEmptyLine();
-			sql.forEachColumn(column -> {
-				column.writeFieldTo(writer);
-			});
-			writer.writeEmptyLine();
-			writer.writeLine("private Result(ResultSet results) throws SQLException {");
-			sql.forEachColumn(column -> {
-				column.writeSetFieldTo(writer);
-			});
-			writer.writeLine('}');
-			writer.writeEmptyLine();
-			sql.forEachColumn(column -> {
-				column.writeGetterTo(writer);
-				writer.writeEmptyLine();
-			});
-			writer.writeLine('}');
-			writer.writeEmptyLine();
-			writer.writeLine("public static class ResultStreamExecutable extends ObjectStreamExecutable<Result> {");
-			writer.writeEmptyLine();
-			writer.writeLine("private ResultStreamExecutable(String sql, Connection connection, ConnectionHandling handling) {");
-			writer.writeLine("super(sql, connection, handling);");
-			writer.writeLine('}');
-			writer.writeEmptyLine();
-			writer.writeLine("@Override");
-			writer.writeLine("protected final Result read(ResultSet results) throws SQLException {");
-			writer.writeLine("return new Result(results);");
-			writer.writeLine('}');
-			writer.writeEmptyLine();
-			writer.writeLine('}');
-			writer.writeEmptyLine();
-		}
+		});
+		writer.writeLine('}');
+		writer.writeEmptyLine();
+	}
+
+	public void writeResultStreamExecutable() throws IOException {
+		writer.writeLine("public static class ResultStreamExecutable extends ObjectStreamExecutable<Result> {");
+		writer.writeEmptyLine();
+		writer.writeLine("private ResultStreamExecutable(String sql, Connection connection, ConnectionHandling handling) {");
+		writer.writeLine("super(sql, connection, handling);");
+		writer.writeLine('}');
+		writer.writeEmptyLine();
+		writer.writeLine("@Override");
+		writer.writeLine("protected final Result read(ResultSet results) throws SQLException {");
+		writer.writeLine("return new ResultImpl(results);");
+		writer.writeLine('}');
+		writer.writeEmptyLine();
+		writer.writeLine('}');
+		writer.writeEmptyLine();
 	}
 
 	private void writeParameterInterfaces() throws IOException {
