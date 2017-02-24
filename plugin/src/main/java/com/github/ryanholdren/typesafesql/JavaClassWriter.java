@@ -31,6 +31,7 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		writeSQLConstant();
 		if (sql.needsResultClass()) {
 			writeResultInterface();
+			writeResultDecorator();
 			writeResultClass();
 			writeResultStreamExecutable();
 		}
@@ -47,12 +48,14 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		super.forEachImport(action);
 		sql.forEachRequiredImport(action, true);
 		action.accept("com.github.ryanholdren.typesafesql." + sql.getClassNameOfExecutableParentClass());
+		action.accept("com.github.ryanholdren.typesafesql.RuntimeSQLException");
+		action.accept("com.github.ryanholdren.typesafesql.ConnectionSupplier");
 		action.accept("static java.lang.String.join");
 		action.accept("static java.lang.System.lineSeparator");
+		action.accept("java.sql.SQLException");
 		if (sql.needsResultClass()) {
 			action.accept("com.github.ryanholdren.typesafesql.ColumnPosition");
 			action.accept("java.sql.ResultSet");
-			action.accept("java.sql.SQLException");
 		}
 	}
 
@@ -82,11 +85,7 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 	}
 
 	private static String escape(String line) {
-		if (line.indexOf('\\') < 0) {
-			return line;
-		} else {
-			return line.replace("\\", "\\\\");
-		}
+		return line.replace("\\", "\\\\").replace("\"", "\\\"");
 	}
 
 	protected static final Pattern PRECEDING_WHITESPACE = Pattern.compile("^\\s*");
@@ -110,8 +109,21 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		writer.writeEmptyLine();
 	}
 
+	private void writeResultDecorator() throws IOException {
+		writer.writeLine("public interface ForwardingResult {");
+		writer.writeEmptyLine();
+		writer.writeLine("Result getDelegate();");
+		writer.writeEmptyLine();
+		sql.forEachColumn(column -> {
+			column.writeDelegatorTo(writer);
+			writer.writeEmptyLine();
+		});
+		writer.writeLine('}');
+		writer.writeEmptyLine();
+	}
+
 	public void writeResultClass() throws IOException {
-			writer.writeLine("private static final class ResultImpl implements Result {");
+		writer.writeLine("private static final class ResultImpl implements Result {");
 		writer.writeEmptyLine();
 		sql.forEachColumn(column -> {
 			column.writeFieldTo(writer);
@@ -191,6 +203,15 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		final String nameOfFirstInterface = getNameOfFirstInterface();
 		writer.writeLine("public static final ", nameOfFirstInterface, " using(Connection connection, ConnectionHandling handling) {");
 		writer.writeLine("return new Prepared(connection, handling);");
+		writer.writeLine('}');
+		writer.writeEmptyLine();
+		writer.writeLine("public static final ", nameOfFirstInterface, " using(ConnectionSupplier connectionSupplier, ConnectionHandling handling) {");
+		writer.writeLine("try {");
+		writer.writeLine("final Connection connection = connectionSupplier.openConnection();");
+		writer.writeLine("return new Prepared(connection, handling);");
+		writer.writeLine("} catch (SQLException exception) {");
+		writer.writeLine("throw new RuntimeSQLException(exception);");
+		writer.writeLine('}');
 		writer.writeLine('}');
 		writer.writeEmptyLine();
 	}

@@ -63,12 +63,13 @@ public abstract class Parameter implements RequiresImports {
 	}
 
 	public void writeImplementationOfInterfaceTo(AutoIndentingWriter writer, String returnType) throws IOException {
+		final String nameOfStatement = name.equals("statement") ? "sqlStatement" : "statement";
 		if (isNotAllowedToBeNull) {
 			writer.writeLine("@Override");
 			writer.writeLine("public final ", returnType, " without", capitalizedName, "() {");
-			writer.writeLine("return safelyUseStatement(statement -> {");
+			writer.writeLine("return safelyUseStatement(", nameOfStatement, " -> {");
 			for (int position : positions) {
-				writer.writeLine("statement.setNull(", position, ", Types.", nameOfJDBCConstant, ");");
+				writer.writeLine(nameOfStatement, ".setNull(", position, ", Types.", nameOfJDBCConstant, ");");
 			}
 			writer.writeLine("return this;");
 			writer.writeLine("});");
@@ -77,16 +78,16 @@ public abstract class Parameter implements RequiresImports {
 		}
 		writer.writeLine("@Override");
 		writer.writeLine("public final ", returnType, " with", capitalizedName, "(", argumentType, " ", name, ") {");
-		writer.writeLine("return safelyUseStatement(statement -> {");
+		writer.writeLine("return safelyUseStatement(", nameOfStatement, " -> {");
 		if (isNotAllowedToBeNull) {
-			writeStatementSettersTo(writer);
+			writeStatementSettersTo(nameOfStatement, writer);
 		} else {
 			writer.writeLine("if (", name, " == null) {");
 			for (int position : positions) {
-				writer.writeLine("statement.setNull(", position, ", Types." + nameOfJDBCConstant, ");");
+				writer.writeLine(nameOfStatement, ".setNull(", position, ", Types." + nameOfJDBCConstant, ");");
 			}
 			writer.writeLine("} else {");
-			writeStatementSettersTo(writer);
+			writeStatementSettersTo(nameOfStatement, writer);
 			writer.writeLine("}");
 		}
 		writer.writeLine("return this;");
@@ -95,9 +96,9 @@ public abstract class Parameter implements RequiresImports {
 		writer.writeEmptyLine();
 	}
 
-	protected void writeStatementSettersTo(AutoIndentingWriter writer) throws IOException {
+	protected void writeStatementSettersTo(final String nameOfStatement, AutoIndentingWriter writer) throws IOException {
 		for (int position : positions) {
-			writer.writeLine("statement.", getSetter(position, name), ";");
+			writer.writeLine(nameOfStatement, ".", getSetter(position, name), ";");
 		}
 	}
 

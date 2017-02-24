@@ -61,6 +61,14 @@ public abstract class ResultColumn implements RequiresImports {
 		writer.writeLine(nameOfJavaType, " get", capitalizedName, "();");
 	}
 
+	public void writeDelegatorTo(AutoIndentingWriter writer) throws IOException {
+		final String nameOfJavaType = getNameOfJavaType();
+		final String capitalizedName = capitalize(name);
+		writer.writeLine("default ", nameOfJavaType, " get", capitalizedName, "() {");
+		writer.writeLine("return getDelegate().get", capitalizedName, "();");
+		writer.writeLine('}');
+	}
+
 	public void writeGetterTo(AutoIndentingWriter writer) throws IOException {
 		final String nameOfJavaType = getNameOfJavaType();
 		final String capitalizedName = capitalize(name);
