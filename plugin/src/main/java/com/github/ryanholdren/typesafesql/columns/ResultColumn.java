@@ -23,7 +23,7 @@ public abstract class ResultColumn implements RequiresImports {
 		return name;
 	}
 
-	protected abstract String getNameOfJavaType();
+	public abstract String getNameOfJavaType();
 	public abstract String getNameOfResultWhenThisIsTheOnlyColumn();
 
 	@Override
@@ -44,7 +44,7 @@ public abstract class ResultColumn implements RequiresImports {
 		writer.writeLine("private final ", nameOfJavaType, ' ', name, ';');
 	}
 
-	public void writeSetFieldTo(AutoIndentingWriter writer) throws IOException {
+	public void writeSetFieldFromResultSetTo(AutoIndentingWriter writer) throws IOException {
 		final String nameInResultSetGetter = getNameOfGetterInResultSet();
 		writer.writeLine("this.", name, " = ", "results.", nameInResultSetGetter, '(', indexInResultSet, ");");
 	}

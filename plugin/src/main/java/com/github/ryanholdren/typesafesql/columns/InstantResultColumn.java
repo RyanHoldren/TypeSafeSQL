@@ -11,7 +11,7 @@ class InstantResultColumn extends ResultColumn {
 	}
 
 	@Override
-	public void writeSetFieldTo(AutoIndentingWriter writer) throws IOException {
+	public void writeSetFieldFromResultSetTo(AutoIndentingWriter writer) throws IOException {
 		writer.writeLine("final Timestamp ", name, " = results.getTimestamp(", indexInResultSet, ");");
 		writer.writeLine("this.", name, " = ", "results.wasNull() ? null : ", name, ".toInstant();");
 	}

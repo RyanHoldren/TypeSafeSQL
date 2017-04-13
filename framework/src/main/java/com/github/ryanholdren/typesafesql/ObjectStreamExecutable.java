@@ -34,9 +34,7 @@ public abstract class ObjectStreamExecutable<T> extends StreamExecutable<T, Stre
 	}
 
 	public void forEachResult(Consumer<T> action) {
-		try (
-			final Stream<T> stream = execute()
-		) {
+		try (final Stream<T> stream = execute()) {
 			stream.forEach(action);
 		}
 	}

@@ -159,12 +159,30 @@ public class SQL implements RequiresImports {
 
 	@FunctionalInterface
 	public interface ResultColumnConsumer<E extends Exception> {
+
+		default void acceptFirst(ResultColumn column) throws E {
+			accept(column);
+		}
+
 		void accept(ResultColumn column) throws E;
+
+		default void acceptLast(ResultColumn column) throws E {
+			accept(column);
+		}
+
 	}
 
 	public <E extends Exception> void forEachColumn(ResultColumnConsumer<E> action) throws E {
-		for (ResultColumn column : columns) {
-			action.accept(column);
+		final int indexOfLast = columns.size() - 1;
+		for (int index = 0; index <= indexOfLast; index++) {
+			final ResultColumn column = columns.get(index);
+			if (index == 0) {
+				action.acceptFirst(column);
+			} else if (index == indexOfLast) {
+				action.acceptLast(column);
+			} else {
+				action.accept(column);
+			}
 		}
 	}
 

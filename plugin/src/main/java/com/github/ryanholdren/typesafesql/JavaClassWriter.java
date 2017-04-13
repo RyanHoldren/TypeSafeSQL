@@ -1,5 +1,8 @@
 package com.github.ryanholdren.typesafesql;
 
+import com.github.ryanholdren.typesafesql.SQL.ResultColumnConsumer;
+import com.github.ryanholdren.typesafesql.columns.ResultColumn;
+import static com.github.ryanholdren.typesafesql.columns.ResultColumn.capitalize;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -123,15 +126,43 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 	}
 
 	public void writeResultClass() throws IOException {
-		writer.writeLine("private static final class ResultImpl implements Result {");
+		writer.writeLine("public static class BasicResult implements Result {");
 		writer.writeEmptyLine();
 		sql.forEachColumn(column -> {
 			column.writeFieldTo(writer);
 		});
 		writer.writeEmptyLine();
-		writer.writeLine("private ResultImpl(ResultSet results) throws SQLException {");
+		writer.writeLine("public BasicResult(Result result) {");
 		sql.forEachColumn(column -> {
-			column.writeSetFieldTo(writer);
+			final String name = column.getName();
+			final String capitalizedName = capitalize(name);
+			writer.writeLine("this.", name, " = result.get", capitalizedName, "();");
+		});
+		writer.writeLine('}');
+		writer.writeEmptyLine();
+		writer.writeLine("public BasicResult(");
+		sql.forEachColumn(new ResultColumnConsumer() {
+
+			@Override
+			public void accept(ResultColumn column) throws Exception {
+				writer.writeLine("final ", column.getNameOfJavaType(), ' ', column.getName(), ',');
+			}
+
+			@Override
+			public void acceptLast(ResultColumn column) throws Exception {
+				writer.writeLine("final ", column.getNameOfJavaType(), ' ', column.getName());
+			}
+
+		});
+		writer.writeLine(") {");
+		sql.forEachColumn(column -> {
+			writer.writeLine("this.", column.getName(), " = ", column.getName(), ';');
+		});
+		writer.writeLine('}');
+		writer.writeEmptyLine();
+		writer.writeLine("private BasicResult(ResultSet results) throws SQLException {");
+		sql.forEachColumn(column -> {
+			column.writeSetFieldFromResultSetTo(writer);
 		});
 		writer.writeLine('}');
 		writer.writeEmptyLine();
@@ -152,7 +183,7 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		writer.writeEmptyLine();
 		writer.writeLine("@Override");
 		writer.writeLine("protected final Result read(ResultSet results) throws SQLException {");
-		writer.writeLine("return new ResultImpl(results);");
+		writer.writeLine("return new BasicResult(results);");
 		writer.writeLine('}');
 		writer.writeEmptyLine();
 		writer.writeLine('}');

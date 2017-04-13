@@ -11,7 +11,7 @@ class LocalDateResultColumn extends ResultColumn {
 	}
 
 	@Override
-	public void writeSetFieldTo(AutoIndentingWriter writer) throws IOException {
+	public void writeSetFieldFromResultSetTo(AutoIndentingWriter writer) throws IOException {
 		writer.writeLine("final Date ", name, " = results.getDate(", indexInResultSet, ");");
 		writer.writeLine("this.", name, " = ", "results.wasNull() ? null : ", name, ".toLocalDate();");
 	}

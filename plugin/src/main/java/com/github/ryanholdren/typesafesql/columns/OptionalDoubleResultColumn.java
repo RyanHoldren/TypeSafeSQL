@@ -11,7 +11,7 @@ class OptionalDoubleResultColumn extends ResultColumn {
 	}
 
 	@Override
-	public void writeSetFieldTo(AutoIndentingWriter writer) throws IOException {
+	public void writeSetFieldFromResultSetTo(AutoIndentingWriter writer) throws IOException {
 		writer.writeLine("final double ", name, " = results.getDouble(", indexInResultSet, ");");
 		writer.writeLine("this.", name, " = ", "results.wasNull() ? OptionalDouble.empty() : OptionalDouble.of(", name, ");");
 	}

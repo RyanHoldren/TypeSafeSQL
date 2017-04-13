@@ -11,7 +11,7 @@ class OptionalLongResultColumn extends ResultColumn {
 	}
 
 	@Override
-	public void writeSetFieldTo(AutoIndentingWriter writer) throws IOException {
+	public void writeSetFieldFromResultSetTo(AutoIndentingWriter writer) throws IOException {
 		writer.writeLine("final long ", name, " = results.getLong(", indexInResultSet, ");");
 		writer.writeLine("this.", name, " = ", "results.wasNull() ? OptionalLong.empty() : OptionalLong.of(", name, ");");
 	}

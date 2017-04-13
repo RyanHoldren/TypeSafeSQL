@@ -11,7 +11,7 @@ class UUIDResultColumn extends ResultColumn {
 	}
 
 	@Override
-	public void writeSetFieldTo(AutoIndentingWriter writer) throws IOException {
+	public void writeSetFieldFromResultSetTo(AutoIndentingWriter writer) throws IOException {
 		writer.writeLine("this.", name, " = (UUID) results.getObject(", indexInResultSet, ");");
 	}
 

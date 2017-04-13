@@ -32,6 +32,8 @@ import org.apache.maven.plugin.logging.Log;
 
 public abstract class AbstractSQLMojo extends AbstractMojo {
 
+	private static final int NUMBER_OF_THREADS = 24;
+
 	protected static Path replaceInPath(Path path, Pattern pattern, String replacement) {
 		final Matcher matcher = pattern.matcher(path.toString());
 		if (matcher.find()) {
@@ -112,6 +114,7 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 				});
 			}
 			log.info(
+				"\n" +
 				"\tCreated: " + created.longValue() + lineSeparator() +
 				"\tUpdated: " + updated.longValue() + lineSeparator() +
 				"\tSkipped: " + skipped.longValue() + lineSeparator() +
@@ -153,7 +156,7 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 	private ExecutorService createExectutorService() {
 		final AtomicInteger numberOfThreads = new AtomicInteger(0);
 		return newFixedThreadPool(
-			Runtime.getRuntime().availableProcessors(),
+			NUMBER_OF_THREADS,
 			runnable -> {
 				final Thread thread = new Thread(runnable, "SQL Processing Worker #" + numberOfThreads.incrementAndGet());
 				thread.setDaemon(true);
