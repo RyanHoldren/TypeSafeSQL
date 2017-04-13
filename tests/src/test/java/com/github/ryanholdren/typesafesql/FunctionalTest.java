@@ -1,40 +1,27 @@
 package com.github.ryanholdren.typesafesql;
 
 import static com.github.ryanholdren.typesafesql.ConnectionHandling.CLOSE_WHEN_DONE;
-import com.opentable.db.postgres.embedded.EmbeddedPostgreSQL;
-import java.io.IOException;
+import static com.opentable.db.postgres.junit.EmbeddedPostgresRules.preparedDatabase;
+import com.opentable.db.postgres.junit.PreparedDbRule;
 import java.sql.Connection;
 import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class FunctionalTest {
 
-	private static final EmbeddedPostgreSQL postgres;
+	@Rule
+	public final PreparedDbRule rule = preparedDatabase(source -> {
+		CreateAssertFunction
+			.using(source.getConnection(), CLOSE_WHEN_DONE)
+			.getNumberOfRowsAffected();
+	});
 
-	static {
-		try {
-			final Runtime runtime = Runtime.getRuntime();
-			postgres = EmbeddedPostgreSQL.start();
-			runtime.addShutdownHook(new Thread(() -> {
-				try {
-					postgres.close();
-				} catch (IOException exception) {
-					throw new RuntimeException(exception);
-				}
-			}));
-			CreateAssertFunction
-				.using(openConnection(), CLOSE_WHEN_DONE)
-				.getNumberOfRowsAffected();
-		} catch (Throwable exception) {
-			throw new ExceptionInInitializerError(exception);
-		}
-	}
-
-	protected static Connection openConnection() throws Throwable {
-		return postgres.getPostgresDatabase().getConnection();
+	protected Connection openConnection() throws Throwable {
+		return rule.getTestDatabase().getConnection();
 	}
 
 	@Test

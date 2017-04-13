@@ -3,12 +3,12 @@ package com.github.ryanholdren.typesafesql.mocking;
 import com.github.ryanholdren.typesafesql.LongStreamExecutable;
 import java.util.NoSuchElementException;
 import java.util.function.LongConsumer;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
 import static java.util.stream.LongStream.of;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class LongStreamExecutableMocker implements ExecutableMocker {
 
@@ -28,7 +28,7 @@ public class LongStreamExecutableMocker implements ExecutableMocker {
 			when(executable.getFirstResult()).thenReturn(results[0]);
 		}
 		doAnswer(invocation -> {
-			final LongConsumer consumer = invocation.getArgumentAt(0, LongConsumer.class);
+			final LongConsumer consumer = invocation.getArgument(0);
 			for (long result : results) {
 				consumer.accept(result);
 			}

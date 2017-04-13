@@ -1,7 +1,6 @@
 package com.github.ryanholdren.typesafesql;
 
 import static com.github.ryanholdren.typesafesql.ConnectionHandling.CLOSE_WHEN_DONE;
-import static com.github.ryanholdren.typesafesql.FunctionalTest.openConnection;
 import com.github.ryanholdren.typesafesql.TestTwoUUIDColumns.Result;
 import java.util.UUID;
 import static java.util.UUID.fromString;

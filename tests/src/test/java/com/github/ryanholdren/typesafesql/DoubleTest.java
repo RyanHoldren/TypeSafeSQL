@@ -1,7 +1,6 @@
 package com.github.ryanholdren.typesafesql;
 
 import static com.github.ryanholdren.typesafesql.ConnectionHandling.CLOSE_WHEN_DONE;
-import static com.github.ryanholdren.typesafesql.FunctionalTest.openConnection;
 import com.github.ryanholdren.typesafesql.TestTwoDoubleColumns.Result;
 import java.util.function.Consumer;
 import java.util.stream.DoubleStream;

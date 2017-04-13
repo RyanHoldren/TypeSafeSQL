@@ -18,7 +18,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({TestComplex.class})
+@PrepareForTest(TestComplex.class)
 public class MockerTest {
 
 	private static final byte[] EXPECTED_FIRST_INPUT = {1, 2, 3, 4};
