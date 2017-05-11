@@ -4,6 +4,7 @@ import com.github.ryanholdren.typesafesql.SQL.ResultColumnConsumer;
 import com.github.ryanholdren.typesafesql.columns.ResultColumn;
 import static com.github.ryanholdren.typesafesql.columns.ResultColumn.capitalize;
 import java.io.IOException;
+import static java.lang.String.join;
 import java.util.Iterator;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -34,7 +35,7 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		writeSQLConstant();
 		if (sql.needsResultClass()) {
 			writeResultInterface();
-			writeResultDecorator();
+			writeResultForwarder();
 			writeResultClass();
 			writeResultStreamExecutable();
 		}
@@ -102,7 +103,12 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 	}
 
 	public void writeResultInterface() throws IOException {
-		writer.writeLine("public interface Result {");
+		if (sql.hasInterfaces()) {
+			final String interfaces = join(", ", sql.getInterfaces());
+			writer.writeLine("public interface Result extends ", interfaces, " {");
+		} else {
+			writer.writeLine("public interface Result {");
+		}
 		writer.writeEmptyLine();
 		sql.forEachColumn(column -> {
 			column.writeGetterDefinitionTo(writer);
@@ -112,8 +118,8 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		writer.writeEmptyLine();
 	}
 
-	private void writeResultDecorator() throws IOException {
-		writer.writeLine("public interface ForwardingResult {");
+	private void writeResultForwarder() throws IOException {
+		writer.writeLine("public interface ForwardingResult extends Result {");
 		writer.writeEmptyLine();
 		writer.writeLine("Result getDelegate();");
 		writer.writeEmptyLine();

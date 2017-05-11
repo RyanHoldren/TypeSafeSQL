@@ -20,11 +20,21 @@ class UUIDParameter extends Parameter {
 
 	@Override
 	protected String getNameOfJDBCConstant() {
-		return "VARCHAR";
+		return "OTHER";
 	}
 
 	@Override
 	public String getArgumentType() {
+		return "UUID";
+	}
+
+	@Override
+	public boolean needsCasting() {
+		return true;
+	}
+
+	@Override
+	public String getCast() {
 		return "UUID";
 	}
 

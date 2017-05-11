@@ -17,19 +17,24 @@ import static java.util.Optional.of;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static java.util.regex.Pattern.*;
 
 public class SQL implements RequiresImports {
 
-	protected static final Pattern PARAMETER = Pattern.compile("\\{(?<direction>in|out):(?<type>[A-Z][A-Z_]+):(?<name>[a-z][a-zA-Z0-9]*)\\}");
+	protected static final String IDENTIFIER = "\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*";
+	protected static final Pattern IMPLEMENTS = compile("^\\{implements:(?<className>" + IDENTIFIER + "(?:\\." + IDENTIFIER + ")*)\\}$");
+	protected static final Pattern PARAMETER = compile("\\{(?<direction>in|out):(?<type>[A-Z][A-Z_]+):(?<name>[a-z][a-zA-Z0-9]*)\\}");
 
 	protected final ImmutableList<ResultColumn> columns;
 	protected final ImmutableList<Parameter> parameters;
 	protected final ImmutableList<String> lines;
+	protected final ImmutableList<String> interfaces;
 
 	public SQL(BufferedReader reader) throws IOException {
 		final LinkedHashMap<String, ResultColumn> columnsBuilder = new LinkedHashMap<>();
 		final LinkedHashMap<String, Parameter> parametersBuilder = new LinkedHashMap<>();
 		final ImmutableList.Builder<String> linesBuilder = ImmutableList.builder();
+		final ImmutableList.Builder<String> interfacesBuilder = ImmutableList.builder();
 		int parameterPosition = 1;
 		int columnPosition = 1;
 		while (true) {
@@ -40,22 +45,32 @@ public class SQL implements RequiresImports {
 			if (isEntirelyWhitespace(line)) {
 				continue;
 			}
-			final Matcher matcher = PARAMETER.matcher(line);
-			if (matcher.find()) {
+			final Matcher interfaceMatcher = IMPLEMENTS.matcher(line);
+			if (interfaceMatcher.find()) {
+				final String className = interfaceMatcher.group("className");
+				interfacesBuilder.add(className);
+				continue;
+			}
+			final Matcher parameterMatcher = PARAMETER.matcher(line);
+			if (parameterMatcher.find()) {
 				final StringBuilder lineBuilder = new StringBuilder();
 				int end = 0;
 				do {
-					final int start = matcher.start();
+					final int start = parameterMatcher.start();
 					final String before = line.substring(end, start);
 					lineBuilder.append(before);
-					final String direction = matcher.group("direction");
-					final String nameOfType = matcher.group("type");
-					final String name = matcher.group("name");
+					final String direction = parameterMatcher.group("direction");
+					final String nameOfType = parameterMatcher.group("type");
+					final String name = parameterMatcher.group("name");
 					if (direction.equals("in")) {
 						final ParameterType type = ParameterType.valueOf(nameOfType);
 						final Parameter parameter = parametersBuilder.computeIfAbsent(name, type::createParameter);
 						parameter.addPosition(parameterPosition ++);
 						lineBuilder.append('?');
+						if (parameter.needsCasting()) {
+							lineBuilder.append("::");
+							lineBuilder.append(parameter.getCast());
+						}
 					} else {
 						final ResultColumnType type = ResultColumnType.valueOf(nameOfType);
 						final ResultColumn column = type.createResultColumn(columnPosition ++, name);
@@ -64,8 +79,8 @@ public class SQL implements RequiresImports {
 						}
 						lineBuilder.append(name);
 					}
-					end = matcher.end();
-				} while (matcher.find());
+					end = parameterMatcher.end();
+				} while (parameterMatcher.find());
 				final String after = line.substring(end, line.length());
 				lineBuilder.append(after);
 				linesBuilder.add(lineBuilder.toString());
@@ -74,6 +89,7 @@ public class SQL implements RequiresImports {
 			}
 		}
 		lines = linesBuilder.build();
+		interfaces = interfacesBuilder.build();
 		columns = copyOf(columnsBuilder.values());
 		parameters = copyOf(parametersBuilder.values());
 	}
@@ -121,6 +137,14 @@ public class SQL implements RequiresImports {
 
 	public ImmutableList<Parameter> getParameters() {
 		return parameters;
+	}
+
+	public boolean hasInterfaces() {
+		return interfaces.size() > 0;
+	}
+
+	public ImmutableList<String> getInterfaces() {
+		return interfaces;
 	}
 
 	@FunctionalInterface

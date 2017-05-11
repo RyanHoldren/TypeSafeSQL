@@ -44,6 +44,14 @@ public abstract class Parameter implements RequiresImports {
 		return "needs" + capitalizedName;
 	}
 
+	public boolean needsCasting() {
+		return false;
+	}
+
+	public String getCast() {
+		throw new UnsupportedOperationException();
+	}
+
 	@Override
 	public void forEachRequiredImport(Consumer<String> action, boolean isNotMocking) {
 		if (isNotMocking) {
@@ -54,9 +62,7 @@ public abstract class Parameter implements RequiresImports {
 	public void writeInterfaceTo(AutoIndentingWriter writer, String returnType) throws IOException {
 		final String nameOfInterface = getNameOfInterface();
 		writer.writeLine("public interface ", nameOfInterface, " {");
-		if (isNotAllowedToBeNull) {
-			writer.writeLine(returnType, " without", capitalizedName, "();");
-		}
+		writer.writeLine(returnType, " without", capitalizedName, "();");
 		writer.writeLine(returnType, " with", capitalizedName, '(', argumentType, ' ', name, ");");
 		writer.writeLine('}');
 		writer.writeEmptyLine();
@@ -64,18 +70,16 @@ public abstract class Parameter implements RequiresImports {
 
 	public void writeImplementationOfInterfaceTo(AutoIndentingWriter writer, String returnType) throws IOException {
 		final String nameOfStatement = name.equals("statement") ? "sqlStatement" : "statement";
-		if (isNotAllowedToBeNull) {
-			writer.writeLine("@Override");
-			writer.writeLine("public final ", returnType, " without", capitalizedName, "() {");
-			writer.writeLine("return safelyUseStatement(", nameOfStatement, " -> {");
-			for (int position : positions) {
-				writer.writeLine(nameOfStatement, ".setNull(", position, ", Types.", nameOfJDBCConstant, ");");
-			}
-			writer.writeLine("return this;");
-			writer.writeLine("});");
-			writer.writeLine('}');
-			writer.writeEmptyLine();
+		writer.writeLine("@Override");
+		writer.writeLine("public final ", returnType, " without", capitalizedName, "() {");
+		writer.writeLine("return safelyUseStatement(", nameOfStatement, " -> {");
+		for (int position : positions) {
+			writer.writeLine(nameOfStatement, ".setNull(", position, ", Types.", nameOfJDBCConstant, ");");
 		}
+		writer.writeLine("return this;");
+		writer.writeLine("});");
+		writer.writeLine('}');
+		writer.writeEmptyLine();
 		writer.writeLine("@Override");
 		writer.writeLine("public final ", returnType, " with", capitalizedName, "(", argumentType, " ", name, ") {");
 		writer.writeLine("return safelyUseStatement(", nameOfStatement, " -> {");
@@ -83,9 +87,7 @@ public abstract class Parameter implements RequiresImports {
 			writeStatementSettersTo(nameOfStatement, writer);
 		} else {
 			writer.writeLine("if (", name, " == null) {");
-			for (int position : positions) {
-				writer.writeLine(nameOfStatement, ".setNull(", position, ", Types." + nameOfJDBCConstant, ");");
-			}
+			writer.writeLine("return without", capitalizedName, "();");
 			writer.writeLine("} else {");
 			writeStatementSettersTo(nameOfStatement, writer);
 			writer.writeLine("}");
