@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>com.github.ryanholdren.typesafesql</groupId>
 		<artifactId>parent</artifactId>
-		<version>2017-05-11</version>
+		<version>2017-05-20</version>
 	</parent>
-	<artifactId>plugin</artifactId>
-	<name>TypeSafeSQL Plugin</name>
+	<artifactId>maven-plugin</artifactId>
+	<name>TypeSafeSQL Maven Plugin</name>
 	<packaging>maven-plugin</packaging>
 
 	<dependencies>
@@ -31,9 +31,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>19.0</version>
+			<groupId>com.github.ryanholdren.typesafesql</groupId>
+			<artifactId>translater</artifactId>
+			<version>2017-05-20</version>
 		</dependency>
 	</dependencies>
 

@@ -13,11 +13,10 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newCachedThreadPool;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import static java.util.stream.Stream.empty;
 import static java.util.stream.Stream.of;
 import static java.util.stream.StreamSupport.stream;
 
@@ -38,7 +37,6 @@ public class ConcurrentMergeSort<R> extends Semaphore implements Spliterator<R> 
 
 		private ExecutorService executor = DEFAULT_THREAD_POOL;
 		private Consumer<? super Throwable> exceptionHandler = IGNORE;
-		private Stream<? extends Supplier<? extends Stream<? extends R>>> suppliers = empty();
 
 		private Builder(Comparator<? super R> comparator) {
 			this.comparator = comparator;
@@ -54,7 +52,8 @@ public class ConcurrentMergeSort<R> extends Semaphore implements Spliterator<R> 
 			return this;
 		}
 
-		public Stream<? extends R> concurrentlyMergeSort(Supplier<? extends Stream<? extends R>> ... suppliers) {
+		@SafeVarargs
+		public final Stream<? extends R> concurrentlyMergeSort(Supplier<? extends Stream<? extends R>> ... suppliers) {
 			return concurrentlyMergeSort(of(suppliers));
 		}
 
@@ -97,18 +96,14 @@ public class ConcurrentMergeSort<R> extends Semaphore implements Spliterator<R> 
 						@Override
 						protected void runOnce() {
 							try {
-								if (spliterator.tryAdvance(this) == false) {
-									release();
-									close();
+								if (isOpen() && spliterator.tryAdvance(this)) {
+									return;
 								}
 							} catch (Throwable throwable) {
-								try {
-									exceptionHandler.accept(throwable);
-								} finally {
-									release();
-									close();
-								}
+								exceptionHandler.accept(throwable);
 							}
+							close();
+							release();
 						}
 
 						@Override
@@ -121,12 +116,12 @@ public class ConcurrentMergeSort<R> extends Semaphore implements Spliterator<R> 
 							}
 						}
 
-						private final AtomicBoolean wasClosed = new AtomicBoolean(false);
-
 						@Override
-						public void close() {
-							if (wasClosed.compareAndSet(false, true)) {
+						protected void doClose() {
+							try {
 								stream.close();
+							} catch (Throwable throwable) {
+								exceptionHandler.accept(throwable);
 							}
 						}
 
@@ -188,22 +183,55 @@ public class ConcurrentMergeSort<R> extends Semaphore implements Spliterator<R> 
 	}
 
 	private void close() {
-		while (true) {
-			final Entry<R, StreamTask<R>> entry = results.pollFirstEntry();
-			if (entry == null) {
-				return;
+		try {
+			while (true) {
+				final Entry<R, StreamTask<R>> entry = results.pollFirstEntry();
+				if (entry == null) {
+					return;
+				}
+				entry.getValue().close();
 			}
-			entry.getValue().close();
+		} catch (Throwable throwable) {
+			while (true) {
+				final Entry<R, StreamTask<R>> entry = results.pollFirstEntry();
+				if (entry == null) {
+					throw throwable;
+				}
+				try {
+					entry.getValue().close();
+				} catch (Throwable suppressed) {
+					throwable.addSuppressed(suppressed);
+				}
+			}
 		}
 	}
 
 	private static abstract class StreamTask<R> extends RepeatingTask implements Consumer<R> {
 
-		public StreamTask(Executor executor) {
+		private static final AtomicReferenceFieldUpdater<StreamTask, State> STATE_UPDATER = AtomicReferenceFieldUpdater.newUpdater(StreamTask.class, State.class, "state");
+
+		protected enum State {
+			OPEN,
+			CLOSED
+		}
+
+		private volatile State state = State.OPEN;
+
+		protected StreamTask(Executor executor) {
 			super(executor);
 		}
 
-		public abstract void close();
+		protected boolean isOpen() {
+			return state == State.OPEN;
+		}
+
+		public final void close() {
+			if (STATE_UPDATER.compareAndSet(this, State.OPEN, State.CLOSED)) {
+				doClose();
+			}
+		}
+
+		protected abstract void doClose();
 
 	}
 

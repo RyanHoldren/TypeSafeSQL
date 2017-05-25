@@ -1,5 +1,6 @@
 package com.github.ryanholdren.typesafesql;
 
+import static com.github.ryanholdren.typesafesql.Once.once;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -56,7 +57,7 @@ public abstract class StreamExecutable<T, S extends BaseStream<T, S>> extends Ex
 				}
 			};
 			final S stream = helpExecute(results);
-			return stream.onClose(cleanup);
+			return stream.onClose(once(cleanup));
 		});
 	}
 

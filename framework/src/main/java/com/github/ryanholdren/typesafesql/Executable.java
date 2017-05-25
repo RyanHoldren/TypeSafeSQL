@@ -67,12 +67,4 @@ public abstract class Executable {
 		}
 	}
 
-	@Override
-	protected void finalize() {
-		try {
-			close();
-		} catch (SQLException excepton) {
-		}
-	}
-
 }

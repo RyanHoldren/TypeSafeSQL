@@ -16,14 +16,14 @@ public abstract class RepeatingTask implements Runnable {
 		this.executor = executor;
 	}
 
-	public void enqueue(int repetitions) {
+	public final void enqueue(int repetitions) {
 		if (EXECUTIONS_UPDATER.getAndAdd(this, repetitions) == 0) {
 			executor.execute(this);
 		}
 	}
 
 	@Override
-	public void run() {
+	public final void run() {
 		do {
 			runOnce();
 		} while (EXECUTIONS_UPDATER.decrementAndGet(this) > 0);

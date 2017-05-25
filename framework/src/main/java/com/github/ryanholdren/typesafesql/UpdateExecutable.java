@@ -26,7 +26,7 @@ public class UpdateExecutable extends Executable {
 			return totalUpdateCount;
 		});
 		try {
-				close();
+			close();
 		} catch (SQLException exception) {
 			throw new RuntimeSQLException(exception);
 		}
