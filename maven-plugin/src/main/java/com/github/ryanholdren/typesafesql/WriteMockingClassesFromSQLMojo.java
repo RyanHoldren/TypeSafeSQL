@@ -10,14 +10,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import static org.apache.maven.plugins.annotations.LifecyclePhase.GENERATE_TEST_SOURCES;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 
 @Mojo(name = "write-mocking-classes-from-sql", defaultPhase = GENERATE_TEST_SOURCES, threadSafe = true)
 public class WriteMockingClassesFromSQLMojo extends AbstractSQLMojo {
-
-	@Parameter(defaultValue = "${project}")
-	private MavenProject project;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {

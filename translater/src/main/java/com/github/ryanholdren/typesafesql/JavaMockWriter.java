@@ -1,8 +1,10 @@
 package com.github.ryanholdren.typesafesql;
 
+import com.github.ryanholdren.typesafesql.columns.ResultColumn;
+import com.github.ryanholdren.typesafesql.jdbc.NameOfSpecializedExecutor;
 import com.github.ryanholdren.typesafesql.parameters.Parameter;
-import static com.github.ryanholdren.typesafesql.parameters.Parameter.capitalize;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.function.Consumer;
 
 public class JavaMockWriter extends AbstractJavaClassWriter {
@@ -37,9 +39,10 @@ public class JavaMockWriter extends AbstractJavaClassWriter {
 
 	@Override
 	protected void forEachImport(Consumer<String> action) {
-		super.forEachImport(action);
+		action.accept("java.sql.Connection");
+		action.accept("com.github.ryanholdren.typesafesql.ConnectionHandling");
 		sql.forEachRequiredImport(action, false);
-		action.accept("com.github.ryanholdren.typesafesql.mocking." + sql.getClassOfExecutableMocker());
+		action.accept("com.github.ryanholdren.typesafesql.mocking." + getImportOfExecutable());
 		final String qualifiedNameOfClassBeingMocked = namespace + '.' + getNameOfClassBeingMocked();
 		action.accept("static " + qualifiedNameOfClassBeingMocked + ".using");
 		for (Parameter parameter : sql.getParameters()) {
@@ -66,7 +69,7 @@ public class JavaMockWriter extends AbstractJavaClassWriter {
 			final String capitalizedName = capitalize(name);
 			writer.writeLine("public interface ", capitalizedName, "Mocker {");
 			if (nextParameter == null) {
-				writer.write(sql.getTypeOfExecutableMocker());
+				writer.write(getClassNameOfExecutable());
 			} else {
 				writer.write(nextParameter.getCapitalizedName());
 				writer.write("Mocker");
@@ -79,7 +82,7 @@ public class JavaMockWriter extends AbstractJavaClassWriter {
 
 	private void writeStartMockPreparedClass() throws IOException {
 		writer.write("private static final class Mocker extends ");
-		writer.write(sql.getTypeOfExecutableMocker());
+		writer.write(getClassNameOfExecutable());
 		if (sql.hasParameters()) {
 			writer.write(" implements ");
 			sql.forEachParameter((parameter, nextParameter) -> {
@@ -105,7 +108,7 @@ public class JavaMockWriter extends AbstractJavaClassWriter {
 			final String name = parameter.getName();
 			final String argumentType = parameter.getArgumentType();
 			final String capitalizedName = capitalize(name);
-			final String returnType = nextParameter == null ? sql.getTypeOfExecutableMocker() : capitalize(nextParameter.getName()) + "Mocker";
+			final String returnType = nextParameter == null ? getClassNameOfExecutable() : capitalize(nextParameter.getName()) + "Mocker";
 			final String nextMocker = nextParameter == null ? "getMock()" : "needs" + capitalize(nextParameter.getName());
 			writer.writeLine("private final Needs", capitalizedName, " needs", capitalizedName, " = mock(Needs", capitalizedName, ".class);");
 			writer.writeEmptyLine();
@@ -126,7 +129,7 @@ public class JavaMockWriter extends AbstractJavaClassWriter {
 	private void writeMockUsingMethods() throws IOException {
 		final String nameOfFirstInterface = sql.firstParameter().map(parameter -> {
 			return parameter.getCapitalizedName() + "Mocker";
-		}).orElse(sql.getTypeOfExecutableMocker());
+		}).orElse(getClassNameOfExecutable());
 		writer.writeLine("public static final ", nameOfFirstInterface, " whenConnectionEquals(Connection connection, ConnectionHandling handling) {");
 		writer.writeLine("final Mocker mocker = new Mocker();");
 		final String firstMock = sql.firstParameter().map(parameter -> {
@@ -136,6 +139,34 @@ public class JavaMockWriter extends AbstractJavaClassWriter {
 		writer.writeLine("return mocker;");
 		writer.writeLine('}');
 		writer.writeEmptyLine();
+	}
+
+	public String getClassNameOfExecutable() {
+		final Iterator<ResultColumn> iterator = sql.getColumns().iterator();
+		if (iterator.hasNext()) {
+			final ResultColumn column = iterator.next();
+			if (iterator.hasNext()) {
+				return "ObjectStreamExecutableMocker<Result, ResultStreamExecutable>";
+			} else {
+				return column.accept(NameOfSpecializedExecutor.VISITOR) + "Mocker";
+			}
+		} else {
+			return "UpdateExecutableMocker";
+		}
+	}
+
+	public String getImportOfExecutable() {
+		final Iterator<ResultColumn> iterator = sql.getColumns().iterator();
+		if (iterator.hasNext()) {
+			final ResultColumn column = iterator.next();
+			if (iterator.hasNext()) {
+				return "ObjectStreamExecutableMocker";
+			} else {
+				return column.accept(NameOfSpecializedExecutor.VISITOR) + "Mocker";
+			}
+		} else {
+			return "UpdateExecutableMocker";
+		}
 	}
 
 }

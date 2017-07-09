@@ -1,6 +1,8 @@
 package com.github.ryanholdren.typesafesql;
 
+import com.github.ryanholdren.typesafesql.columns.ParameterImports;
 import com.github.ryanholdren.typesafesql.columns.ResultColumn;
+import com.github.ryanholdren.typesafesql.columns.ResultColumnImports;
 import com.github.ryanholdren.typesafesql.columns.ResultColumnType;
 import com.github.ryanholdren.typesafesql.parameters.Parameter;
 import com.github.ryanholdren.typesafesql.parameters.ParameterType;
@@ -19,7 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static java.util.regex.Pattern.*;
 
-public class SQL implements RequiresImports {
+public class SQL {
 
 	protected static final String IDENTIFIER = "\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*";
 	protected static final Pattern IMPLEMENTS = compile("^\\{implements:(?<className>" + IDENTIFIER + "(?:\\." + IDENTIFIER + ")*)\\}$");
@@ -30,7 +32,7 @@ public class SQL implements RequiresImports {
 	protected final ImmutableList<String> lines;
 	protected final ImmutableList<String> interfaces;
 
-	public SQL(BufferedReader reader) throws IOException {
+	public SQL(TargetAPI api, BufferedReader reader) throws IOException {
 		final LinkedHashMap<String, ResultColumn> columnsBuilder = new LinkedHashMap<>();
 		final LinkedHashMap<String, Parameter> parametersBuilder = new LinkedHashMap<>();
 		final ImmutableList.Builder<String> linesBuilder = ImmutableList.builder();
@@ -65,12 +67,11 @@ public class SQL implements RequiresImports {
 					if (direction.equals("in")) {
 						final ParameterType type = ParameterType.valueOf(nameOfType);
 						final Parameter parameter = parametersBuilder.computeIfAbsent(name, type::createParameter);
-						parameter.addPosition(parameterPosition ++);
-						lineBuilder.append('?');
-						if (parameter.needsCasting()) {
-							lineBuilder.append("::");
-							lineBuilder.append(parameter.getCast());
-						}
+						parameter.addPosition(parameterPosition);
+						lineBuilder.append(api.getParameterPlaceholder(parameterPosition));
+						parameterPosition ++;
+						lineBuilder.append("::");
+						lineBuilder.append(parameter.getCast());
 					} else {
 						final ResultColumnType type = ResultColumnType.valueOf(nameOfType);
 						final ResultColumn column = type.createResultColumn(columnPosition ++, name);
@@ -102,16 +103,13 @@ public class SQL implements RequiresImports {
 		return lines;
 	}
 
-	@Override
 	public void forEachRequiredImport(Consumer<String> action, boolean isNotMocking) {
 		parameters.stream().forEach(parameter -> {
-			parameter.forEachRequiredImport(action, isNotMocking);
+			parameter.accept(ParameterImports.VISITOR).stream().forEach(action);
 		});
-		if (isNotMocking && getNumberOfColumns() > 1) {
-			columns.stream().forEach(column -> {
-				column.forEachRequiredImport(action, isNotMocking);
-			});
-		}
+		columns.stream().forEach(column -> {
+			column.accept(ResultColumnImports.VISITOR).stream().forEach(action);
+		});
 	}
 
 	public boolean hasParameters() {
@@ -208,52 +206,6 @@ public class SQL implements RequiresImports {
 				action.accept(column);
 			}
 		}
-	}
-
-	public String getClassNameOfExecutable() {
-		final Iterator<ResultColumn> iterator = columns.iterator();
-		if (iterator.hasNext()) {
-			final ResultColumn column = iterator.next();
-			if (iterator.hasNext()) {
-				return "ResultStreamExecutable";
-			} else {
-				return column.getNameOfResultWhenThisIsTheOnlyColumn();
-			}
-		} else {
-			return "UpdateExecutable";
-		}
-	}
-
-	public String getClassNameOfExecutableParentClass() {
-		final Iterator<ResultColumn> iterator = columns.iterator();
-		if (iterator.hasNext()) {
-			final ResultColumn column = iterator.next();
-			if (iterator.hasNext()) {
-				return "ObjectStreamExecutable";
-			} else {
-				return column.getNameOfResultWhenThisIsTheOnlyColumn();
-			}
-		} else {
-			return "UpdateExecutable";
-		}
-	}
-
-	public String getTypeOfExecutableMocker() {
-		final Iterator<ResultColumn> iterator = columns.iterator();
-		if (iterator.hasNext()) {
-			final ResultColumn column = iterator.next();
-			if (iterator.hasNext()) {
-				return "ObjectStreamExecutableMocker<Result, ResultStreamExecutable>";
-			} else {
-				return column.getNameOfResultWhenThisIsTheOnlyColumn() + "Mocker";
-			}
-		} else {
-			return "UpdateExecutableMocker";
-		}
-	}
-
-	public String getClassOfExecutableMocker() {
-		return getClassNameOfExecutableParentClass() + "Mocker";
 	}
 
 }

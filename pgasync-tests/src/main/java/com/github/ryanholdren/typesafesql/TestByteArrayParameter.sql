@@ -1,0 +1,1 @@
+SELECT ASSERT(decode('DEADBEEF', 'hex') = {in:VARBINARY:input});

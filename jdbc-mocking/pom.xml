@@ -5,17 +5,17 @@
 	<parent>
 		<groupId>com.github.ryanholdren.typesafesql</groupId>
 		<artifactId>parent</artifactId>
-		<version>2017-05-20</version>
+		<version>2017-07-09</version>
 	</parent>
-	<artifactId>mocking</artifactId>
-	<name>TypeSafeSQL Mocking</name>
+	<artifactId>jdbc-mocking</artifactId>
+	<name>TypeSafeSQL JDBC Mocking</name>
 	<packaging>jar</packaging>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.github.ryanholdren.typesafesql</groupId>
-			<artifactId>framework</artifactId>
-			<version>2017-05-20</version>
+			<artifactId>jdbc-framework</artifactId>
+			<version>2017-07-09</version>
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>

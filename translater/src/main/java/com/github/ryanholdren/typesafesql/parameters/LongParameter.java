@@ -1,29 +1,29 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
-class LongParameter extends Parameter {
+public class LongParameter extends Parameter {
 
 	public LongParameter(String argumentName) {
 		super(argumentName);
 	}
 
 	@Override
-	protected String getNameOfMethodInPreparedStatement() {
-		return "setLong";
-	}
-
-	@Override
-	protected boolean isNullable() {
-		return false;
-	}
-
-	@Override
-	protected String getNameOfJDBCConstant() {
-		return "BIGINT";
+	public <T,E extends Exception> T accept(ParameterVisitor<T,E> visitor) throws E {
+		return visitor.visit(this);
 	}
 
 	@Override
 	public String getArgumentType() {
 		return "long";
+	}
+
+	@Override
+	public String getCast() {
+		return "BIGINT";
+	}
+
+	@Override
+	public boolean isNullable() {
+		return false;
 	}
 
 }

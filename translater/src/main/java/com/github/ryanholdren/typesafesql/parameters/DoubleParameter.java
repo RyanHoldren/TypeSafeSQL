@@ -1,29 +1,29 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
-class DoubleParameter extends Parameter {
+public class DoubleParameter extends Parameter {
 
 	public DoubleParameter(String argumentName) {
 		super(argumentName);
 	}
 
 	@Override
-	protected String getNameOfMethodInPreparedStatement() {
-		return "setDouble";
-	}
-
-	@Override
-	protected boolean isNullable() {
-		return false;
-	}
-
-	@Override
-	protected String getNameOfJDBCConstant() {
-		return "DOUBLE";
+	public <T,E extends Exception> T accept(ParameterVisitor<T,E> visitor) throws E {
+		return visitor.visit(this);
 	}
 
 	@Override
 	public String getArgumentType() {
 		return "double";
+	}
+
+	@Override
+	public String getCast() {
+		return "FLOAT";
+	}
+
+	@Override
+	public boolean isNullable() {
+		return false;
 	}
 
 }

@@ -5,22 +5,16 @@
 	<parent>
 		<groupId>com.github.ryanholdren.typesafesql</groupId>
 		<artifactId>parent</artifactId>
-		<version>2017-05-20</version>
+		<version>2017-07-09</version>
 	</parent>
-	<artifactId>tests</artifactId>
-	<name>TypeSafeSQL Tests</name>
+	<artifactId>pgasync-tests</artifactId>
+	<name>TypeSafeSQL PgAsync Tests</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.github.ryanholdren.typesafesql</groupId>
-			<artifactId>framework</artifactId>
-			<version>2017-05-20</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.ryanholdren.typesafesql</groupId>
-			<artifactId>mocking</artifactId>
-			<version>2017-05-20</version>
-			<scope>test</scope>
+			<artifactId>pgasync-framework</artifactId>
+			<version>2017-07-09</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -41,15 +35,17 @@
 			<plugin>
 				<groupId>com.github.ryanholdren.typesafesql</groupId>
 				<artifactId>maven-plugin</artifactId>
-				<version>2017-05-20</version>
+				<version>2017-07-09</version>
 				<executions>
 					<execution>
 						<goals>
 							<goal>write-classes-from-sql</goal>
-							<goal>write-mocking-classes-from-sql</goal>
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<api>PGASYNC</api>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -1,29 +1,24 @@
 package com.github.ryanholdren.typesafesql.columns;
 
-class BooleanResultColumn extends ResultColumn {
+public class BooleanResultColumn extends ResultColumn {
 
 	public BooleanResultColumn(int indexInResultSet, String name) {
 		super(indexInResultSet, name);
 	}
 
 	@Override
-	protected String getNameOfGetterInResultSet() {
-		return "getBoolean";
-	}
-
-	@Override
-	public String getNameOfJavaType() {
+	public String getReturnType() {
 		return "boolean";
 	}
 
 	@Override
-	public String getNameOfResultWhenThisIsTheOnlyColumn() {
-		return "BooleanStreamExecutable";
+	public String getBoxedReturnType() {
+		return "Boolean";
 	}
 
 	@Override
-	public String getTypeOfResultMockerWhenThisIsTheOnlyColumn() {
-		return "ObjectStreamExecutableMocker<Boolean>";
+	public <T,E extends Exception> T accept(ResultColumnVisitor<T,E> visitor) throws E {
+		return visitor.visit(this);
 	}
 
 }

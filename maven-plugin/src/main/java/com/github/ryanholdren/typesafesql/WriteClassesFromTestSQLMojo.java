@@ -1,19 +1,15 @@
 package com.github.ryanholdren.typesafesql;
 
-import com.github.ryanholdren.typesafesql.JavaClassWriter.Builder;
+import com.github.ryanholdren.typesafesql.AbstractJavaClassWriter.AbstractBuilder;
+import com.github.ryanholdren.typesafesql.jdbc.JDBCClassWriter;
 import java.util.List;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import static org.apache.maven.plugins.annotations.LifecyclePhase.GENERATE_TEST_SOURCES;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 
 @Mojo(name = "write-classes-from-test-sql", defaultPhase = GENERATE_TEST_SOURCES, threadSafe = true)
 public class WriteClassesFromTestSQLMojo extends AbstractSQLMojo {
-
-	@Parameter(defaultValue = "${project}")
-	private MavenProject project;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
@@ -25,8 +21,8 @@ public class WriteClassesFromTestSQLMojo extends AbstractSQLMojo {
 	}
 
 	@Override
-	protected Builder newClassWriterBuilder() {
-		return JavaClassWriter.newBuilder();
+	protected AbstractBuilder newClassWriterBuilder() {
+		return JDBCClassWriter.newBuilder();
 	}
 
 }

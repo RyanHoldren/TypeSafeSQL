@@ -1,0 +1,1 @@
+SELECT 'Bees?' AS {out:VARCHAR:output};

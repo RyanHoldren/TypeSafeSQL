@@ -1,0 +1,1 @@
+SELECT ASSERT({in:DATE:input} = DATE '2004-10-19');

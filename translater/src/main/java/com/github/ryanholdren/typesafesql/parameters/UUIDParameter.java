@@ -1,26 +1,14 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
-import java.util.function.Consumer;
-
-class UUIDParameter extends Parameter {
+public class UUIDParameter extends Parameter {
 
 	public UUIDParameter(String argumentName) {
 		super(argumentName);
 	}
 
 	@Override
-	protected String getNameOfMethodInPreparedStatement() {
-		return "setObject";
-	}
-
-	@Override
-	protected boolean isNullable() {
-		return true;
-	}
-
-	@Override
-	protected String getNameOfJDBCConstant() {
-		return "OTHER";
+	public <T,E extends Exception> T accept(ParameterVisitor<T,E> visitor) throws E {
+		return visitor.visit(this);
 	}
 
 	@Override
@@ -29,19 +17,13 @@ class UUIDParameter extends Parameter {
 	}
 
 	@Override
-	public boolean needsCasting() {
-		return true;
-	}
-
-	@Override
 	public String getCast() {
 		return "UUID";
 	}
 
 	@Override
-	public void forEachRequiredImport(Consumer<String> action, boolean isNotMocking) {
-		super.forEachRequiredImport(action, isNotMocking);
-		action.accept("java.util.UUID");
+	public boolean isNullable() {
+		return true;
 	}
 
 }

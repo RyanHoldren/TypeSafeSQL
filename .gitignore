@@ -7,3 +7,8 @@ nbactions.xml
 /translater/target/
 /maven-plugin/target/
 /gradle-plugin/target/
+/jdbc-framework/target/
+/jdbc-mocking/target/
+/jdbc-tests/target/
+/pgasync-tests/target/
+/pgasync-framework/target/

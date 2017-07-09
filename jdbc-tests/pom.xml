@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.github.ryanholdren.typesafesql</groupId>
+		<artifactId>parent</artifactId>
+		<version>2017-07-09</version>
+	</parent>
+	<artifactId>jdbc-tests</artifactId>
+	<name>TypeSafeSQL JDBC Tests</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.github.ryanholdren.typesafesql</groupId>
+			<artifactId>jdbc-framework</artifactId>
+			<version>2017-07-09</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ryanholdren.typesafesql</groupId>
+			<artifactId>jdbc-mocking</artifactId>
+			<version>2017-07-09</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.opentable.components</groupId>
+			<artifactId>otj-pg-embedded</artifactId>
+			<version>0.7.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.github.ryanholdren.typesafesql</groupId>
+				<artifactId>maven-plugin</artifactId>
+				<version>2017-07-09</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>write-classes-from-sql</goal>
+							<goal>write-mocking-classes-from-sql</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

@@ -1,31 +1,14 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
-import java.util.function.Consumer;
-
-class InstantParameter extends Parameter {
+public class InstantParameter extends Parameter {
 
 	public InstantParameter(String argumentName) {
 		super(argumentName);
 	}
 
 	@Override
-	protected String getNameOfMethodInPreparedStatement() {
-		return "setTimestamp";
-	}
-
-	@Override
-	protected boolean isNullable() {
-		return true;
-	}
-
-	@Override
-	public String getSetter(int position, String nameOfVariable) {
-		return getNameOfMethodInPreparedStatement() + "(" + position + ", Timestamp.from(" + nameOfVariable + "))";
-	}
-
-	@Override
-	protected String getNameOfJDBCConstant() {
-		return "TIMESTAMP";
+	public <T,E extends Exception> T accept(ParameterVisitor<T,E> visitor) throws E {
+		return visitor.visit(this);
 	}
 
 	@Override
@@ -34,12 +17,13 @@ class InstantParameter extends Parameter {
 	}
 
 	@Override
-	public void forEachRequiredImport(Consumer<String> action, boolean isNotMocking) {
-		super.forEachRequiredImport(action, isNotMocking);
-		if (isNotMocking) {
-			action.accept("java.sql.Timestamp");
-		}
-		action.accept("java.time.Instant");
+	public String getCast() {
+		return "TIMESTAMP WITH TIME ZONE";
+	}
+
+	@Override
+	public boolean isNullable() {
+		return true;
 	}
 
 }

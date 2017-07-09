@@ -1,0 +1,1 @@
+SELECT ASSERT({in:DOUBLE:input} IS NULL);

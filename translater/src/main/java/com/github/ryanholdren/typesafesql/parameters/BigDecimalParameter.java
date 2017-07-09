@@ -1,26 +1,14 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
-import java.util.function.Consumer;
-
-class BigDecimalParameter extends Parameter {
+public class BigDecimalParameter extends Parameter {
 
 	public BigDecimalParameter(String argumentName) {
 		super(argumentName);
 	}
 
 	@Override
-	protected String getNameOfMethodInPreparedStatement() {
-		return "setBigDecimal";
-	}
-
-	@Override
-	protected boolean isNullable() {
-		return true;
-	}
-
-	@Override
-	protected String getNameOfJDBCConstant() {
-		return "DECIMAL";
+	public <T,E extends Exception> T accept(ParameterVisitor<T,E> visitor) throws E {
+		return visitor.visit(this);
 	}
 
 	@Override
@@ -29,9 +17,13 @@ class BigDecimalParameter extends Parameter {
 	}
 
 	@Override
-	public void forEachRequiredImport(Consumer<String> action, boolean isNotMocking) {
-		super.forEachRequiredImport(action, isNotMocking);
-		action.accept("java.math.BigDecimal");
+	public String getCast() {
+		return "DECIMAL";
+	}
+
+	@Override
+	public boolean isNullable() {
+		return true;
 	}
 
 }

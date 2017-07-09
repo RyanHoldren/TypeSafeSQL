@@ -2,7 +2,8 @@ package com.github.ryanholdren.typesafesql;
 
 import com.github.ryanholdren.typesafesql.SQL.ResultColumnConsumer;
 import com.github.ryanholdren.typesafesql.columns.ResultColumn;
-import static com.github.ryanholdren.typesafesql.columns.ResultColumn.capitalize;
+import com.github.ryanholdren.typesafesql.jdbc.JDBCClassWriter;
+import com.github.ryanholdren.typesafesql.pgasync.PgAsyncJavaClassWriter;
 import java.io.IOException;
 import static java.lang.String.join;
 import java.util.Iterator;
@@ -10,12 +11,18 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class JavaClassWriter extends AbstractJavaClassWriter {
+public abstract class JavaClassWriter extends AbstractJavaClassWriter {
 
 	public static class Builder extends AbstractBuilder {
 		@Override
-		protected JavaClassWriter createClassWriter() throws IOException {
-			return new JavaClassWriter(this);
+		protected AbstractJavaClassWriter createClassWriter() throws IOException {
+			switch (api) {
+				case PGASYNC:
+					return new PgAsyncJavaClassWriter(this);
+				case JDBC:
+					return new JDBCClassWriter(this);
+			}
+			throw new IllegalArgumentException();
 		}
 	}
 
@@ -23,7 +30,7 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		return new Builder();
 	}
 
-	private JavaClassWriter(Builder builder) throws IOException {
+	protected JavaClassWriter(AbstractBuilder builder) throws IOException {
 		super(builder);
 	}
 
@@ -37,29 +44,19 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 			writeResultInterface();
 			writeResultForwarder();
 			writeResultClass();
-			writeResultStreamExecutable();
 		}
 		writeParameterInterfaces();
-		writeStartPreparedClass();
-		writeParameterSetters();
-		writeEndPreparedClass();
-		writeUsingMethods();
+		writeRestOfClass();
 		writeEndOfClass();
 	}
 
 	@Override
 	protected void forEachImport(Consumer<String> action) {
-		super.forEachImport(action);
 		sql.forEachRequiredImport(action, true);
-		action.accept("com.github.ryanholdren.typesafesql." + sql.getClassNameOfExecutableParentClass());
-		action.accept("com.github.ryanholdren.typesafesql.RuntimeSQLException");
-		action.accept("com.github.ryanholdren.typesafesql.ConnectionSupplier");
 		action.accept("static java.lang.String.join");
 		action.accept("static java.lang.System.lineSeparator");
-		action.accept("java.sql.SQLException");
 		if (sql.needsResultClass()) {
 			action.accept("com.github.ryanholdren.typesafesql.ColumnPosition");
-			action.accept("java.sql.ResultSet");
 		}
 	}
 
@@ -111,7 +108,10 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		}
 		writer.writeEmptyLine();
 		sql.forEachColumn(column -> {
-			column.writeGetterDefinitionTo(writer);
+			final String nameOfJavaType = column.getReturnType();
+			final String capitalizedName = capitalize(column.getName());
+			writer.writeLine("@ColumnPosition(", column.getPosition(), ")");
+			writer.writeLine(nameOfJavaType, " get", capitalizedName, "();");
 			writer.writeEmptyLine();
 		});
 		writer.writeLine('}');
@@ -124,7 +124,12 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		writer.writeLine("Result getDelegate();");
 		writer.writeEmptyLine();
 		sql.forEachColumn(column -> {
-			column.writeDelegatorTo(writer);
+			final String nameOfJavaType = column.getReturnType();
+			final String capitalizedName = capitalize(column.getName());
+			writer.writeLine("@Override");
+			writer.writeLine("default ", nameOfJavaType, " get", capitalizedName, "() {");
+			writer.writeLine("return getDelegate().get", capitalizedName, "();");
+			writer.writeLine('}');
 			writer.writeEmptyLine();
 		});
 		writer.writeLine('}');
@@ -135,7 +140,8 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		writer.writeLine("public static class BasicResult implements Result {");
 		writer.writeEmptyLine();
 		sql.forEachColumn(column -> {
-			column.writeFieldTo(writer);
+			final String nameOfJavaType = column.getReturnType();
+			writer.writeLine("private final ", nameOfJavaType, ' ', column.getName(), ';');
 		});
 		writer.writeEmptyLine();
 		writer.writeLine("public BasicResult(Result result) {");
@@ -151,12 +157,14 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 
 			@Override
 			public void accept(ResultColumn column) throws Exception {
-				writer.writeLine("final ", column.getNameOfJavaType(), ' ', column.getName(), ',');
+				final String nameOfJavaType = column.getReturnType();
+				writer.writeLine("final ", nameOfJavaType, ' ', column.getName(), ',');
 			}
 
 			@Override
 			public void acceptLast(ResultColumn column) throws Exception {
-				writer.writeLine("final ", column.getNameOfJavaType(), ' ', column.getName());
+				final String nameOfJavaType = column.getReturnType();
+				writer.writeLine("final ", nameOfJavaType, ' ', column.getName());
 			}
 
 		});
@@ -166,91 +174,34 @@ public class JavaClassWriter extends AbstractJavaClassWriter {
 		});
 		writer.writeLine('}');
 		writer.writeEmptyLine();
-		writer.writeLine("private BasicResult(ResultSet results) throws SQLException {");
+		writeBasicResultConstructor();
 		sql.forEachColumn(column -> {
-			column.writeSetFieldFromResultSetTo(writer);
-		});
-		writer.writeLine('}');
-		writer.writeEmptyLine();
-		sql.forEachColumn(column -> {
-			column.writeGetterTo(writer);
+			final String nameOfJavaType = column.getReturnType();
+			final String capitalizedName = capitalize(column.getName());
+			writer.writeLine("@Override");
+			writer.writeLine("public final ", nameOfJavaType, " get", capitalizedName, "() {");
+			writer.writeLine("return ", column.getName(), ';');
+			writer.writeLine('}');
 			writer.writeEmptyLine();
 		});
 		writer.writeLine('}');
 		writer.writeEmptyLine();
 	}
 
-	public void writeResultStreamExecutable() throws IOException {
-		writer.writeLine("public static class ResultStreamExecutable extends ObjectStreamExecutable<Result> {");
-		writer.writeEmptyLine();
-		writer.writeLine("private ResultStreamExecutable(String sql, Connection connection, ConnectionHandling handling) {");
-		writer.writeLine("super(sql, connection, handling);");
-		writer.writeLine('}');
-		writer.writeEmptyLine();
-		writer.writeLine("@Override");
-		writer.writeLine("protected final Result read(ResultSet results) throws SQLException {");
-		writer.writeLine("return new BasicResult(results);");
-		writer.writeLine('}');
-		writer.writeEmptyLine();
-		writer.writeLine('}');
-		writer.writeEmptyLine();
-	}
+	protected abstract void writeBasicResultConstructor() throws IOException;
 
 	private void writeParameterInterfaces() throws IOException {
 		sql.forEachParameter((parameter, nextParameter) -> {
-			final String returnType = nextParameter == null ? sql.getClassNameOfExecutable() : nextParameter.getNameOfInterface();
-			parameter.writeInterfaceTo(writer, returnType);
+			final String returnType = nextParameter == null ? getClassNameOfExecutable() : nextParameter.getNameOfInterface();
+			final String nameOfInterface = parameter.getNameOfInterface();
+			writer.writeLine("public interface ", nameOfInterface, " {");
+			writer.writeLine(returnType, " without", parameter.getCapitalizedName(), "();");
+			writer.writeLine(returnType, " with", parameter.getCapitalizedName(), '(', parameter.getArgumentType(), ' ', parameter.getName(), ");");
+			writer.writeLine('}');
+			writer.writeEmptyLine();
 		});
 	}
 
-	private void writeStartPreparedClass() throws IOException {
-		writer.write("private static final class Prepared extends ");
-		writer.write(sql.getClassNameOfExecutable());
-		if (sql.hasParameters()) {
-			writer.write(" implements ");
-			sql.forEachParameter((parameter, nextParameter) -> {
-				final String nameOfInterface = parameter.getNameOfInterface();
-				writer.write(nameOfInterface);
-				if (nextParameter != null) {
-					writer.write(", ");
-				}
-			});
-		}
-		writer.writeLine(" {");
-		writer.writeEmptyLine();
-		writer.writeLine("private Prepared(Connection connection, ConnectionHandling handling) {");
-		writer.writeLine("super(SQL, connection, handling);");
-		writer.writeLine("}");
-		writer.writeEmptyLine();
-	}
-
-	private void writeParameterSetters() throws IOException {
-		sql.forEachParameter((parameter, nextParameter) -> {
-			final String returnType = nextParameter == null ? sql.getClassNameOfExecutable() : nextParameter.getNameOfInterface();
-			parameter.writeImplementationOfInterfaceTo(writer, returnType);
-		});
-	}
-
-	private void writeEndPreparedClass() throws IOException {
-		writer.writeLine('}');
-		writer.writeEmptyLine();
-	}
-
-	private void writeUsingMethods() throws IOException {
-		final String nameOfFirstInterface = getNameOfFirstInterface();
-		writer.writeLine("public static final ", nameOfFirstInterface, " using(Connection connection, ConnectionHandling handling) {");
-		writer.writeLine("return new Prepared(connection, handling);");
-		writer.writeLine('}');
-		writer.writeEmptyLine();
-		writer.writeLine("public static final ", nameOfFirstInterface, " using(ConnectionSupplier connectionSupplier, ConnectionHandling handling) {");
-		writer.writeLine("try {");
-		writer.writeLine("final Connection connection = connectionSupplier.openConnection();");
-		writer.writeLine("return new Prepared(connection, handling);");
-		writer.writeLine("} catch (SQLException exception) {");
-		writer.writeLine("throw new RuntimeSQLException(exception);");
-		writer.writeLine('}');
-		writer.writeLine('}');
-		writer.writeEmptyLine();
-	}
+	protected abstract void writeRestOfClass() throws IOException;
 
 }

@@ -29,8 +29,16 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
 public abstract class AbstractSQLMojo extends AbstractMojo {
+
+	@Parameter(defaultValue = "JDBC")
+	protected TargetAPI api;
+
+	@Parameter(defaultValue = "${project}")
+	protected MavenProject project;
 
 	private static final int NUMBER_OF_THREADS = 24;
 
@@ -80,6 +88,7 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 								try {
 									log.info("Processing '" + sqlPath + "' into '" + javaPath + "'...");
 									newClassWriterBuilder()
+										.setTargetAPI(api)
 										.setNamespace(getNamespaceFrom(javaPath, javaPathRoot))
 										.setClassName(getClassNameFrom(javaPath))
 										.setReader(sqlPath)

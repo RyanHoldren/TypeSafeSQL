@@ -1,0 +1,1 @@
+SELECT ASSERT({in:DOUBLE:input} = 3.14);

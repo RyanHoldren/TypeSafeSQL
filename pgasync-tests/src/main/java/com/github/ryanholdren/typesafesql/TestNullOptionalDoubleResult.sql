@@ -1,0 +1,1 @@
+SELECT NULL AS {out:NULLABLE_DOUBLE:output};

@@ -1,29 +1,29 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
-class BooleanParameter extends Parameter {
+public class BooleanParameter extends Parameter {
 
 	public BooleanParameter(String argumentName) {
 		super(argumentName);
 	}
 
 	@Override
-	protected String getNameOfMethodInPreparedStatement() {
-		return "setBoolean";
-	}
-
-	@Override
-	protected boolean isNullable() {
-		return false;
-	}
-
-	@Override
-	protected String getNameOfJDBCConstant() {
-		return "BOOLEAN";
+	public <T,E extends Exception> T accept(ParameterVisitor<T,E> visitor) throws E {
+		return visitor.visit(this);
 	}
 
 	@Override
 	public String getArgumentType() {
 		return "boolean";
+	}
+
+	@Override
+	public String getCast() {
+		return "BOOLEAN";
+	}
+
+	@Override
+	public boolean isNullable() {
+		return false;
 	}
 
 }

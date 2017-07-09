@@ -1,0 +1,1 @@
+SELECT ASSERT(NOT({in:BOOLEAN:input}));

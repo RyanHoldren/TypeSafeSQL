@@ -1,0 +1,1 @@
+SELECT DATE '2004-10-19' AS {out:DATE:output};

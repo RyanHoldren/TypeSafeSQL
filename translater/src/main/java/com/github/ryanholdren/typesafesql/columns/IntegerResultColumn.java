@@ -1,24 +1,24 @@
 package com.github.ryanholdren.typesafesql.columns;
 
-class IntegerResultColumn extends ResultColumn {
+public class IntegerResultColumn extends ResultColumn {
 
 	public IntegerResultColumn(int indexInResultSet, String name) {
 		super(indexInResultSet, name);
 	}
 
 	@Override
-	public String getNameOfJavaType() {
+	public String getReturnType() {
 		return "int";
 	}
 
 	@Override
-	public String getNameOfResultWhenThisIsTheOnlyColumn() {
-		return "IntStreamExecutable";
+	public String getBoxedReturnType() {
+		return "Integer";
 	}
 
 	@Override
-	public String getTypeOfResultMockerWhenThisIsTheOnlyColumn() {
-		return "IntStreamExecutableMocker";
+	public <T,E extends Exception> T accept(ResultColumnVisitor<T,E> visitor) throws E {
+		return visitor.visit(this);
 	}
 
 }

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.github.ryanholdren.typesafesql</groupId>
 		<artifactId>parent</artifactId>
-		<version>2017-05-20</version>
+		<version>2017-07-09</version>
 	</parent>
 	<artifactId>gradle-plugin</artifactId>
 	<name>TypeSafeSQL Gradle Plugin</name>
@@ -56,7 +56,7 @@
 		<dependency>
 			<groupId>com.github.ryanholdren.typesafesql</groupId>
 			<artifactId>translater</artifactId>
-			<version>2017-05-20</version>
+			<version>2017-07-09</version>
 		</dependency>
 	</dependencies>
 

@@ -1,29 +1,29 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
-class IntegerParameter extends Parameter {
+public class IntegerParameter extends Parameter {
 
 	public IntegerParameter(String argumentName) {
 		super(argumentName);
 	}
 
 	@Override
-	protected String getNameOfMethodInPreparedStatement() {
-		return "setInt";
-	}
-
-	@Override
-	protected boolean isNullable() {
-		return false;
-	}
-
-	@Override
-	protected String getNameOfJDBCConstant() {
-		return "INTEGER";
+	public <T,E extends Exception> T accept(ParameterVisitor<T,E> visitor) throws E {
+		return visitor.visit(this);
 	}
 
 	@Override
 	public String getArgumentType() {
 		return "int";
+	}
+
+	@Override
+	public String getCast() {
+		return "INTEGER";
+	}
+
+	@Override
+	public boolean isNullable() {
+		return false;
 	}
 
 }

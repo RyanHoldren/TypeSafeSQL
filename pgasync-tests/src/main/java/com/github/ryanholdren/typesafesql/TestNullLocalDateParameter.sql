@@ -1,0 +1,1 @@
+SELECT ASSERT({in:DATE:input} IS NULL);

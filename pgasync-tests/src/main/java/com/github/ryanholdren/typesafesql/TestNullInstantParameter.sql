@@ -1,0 +1,1 @@
+SELECT ASSERT({in:TIMESTAMP:input} IS NULL);

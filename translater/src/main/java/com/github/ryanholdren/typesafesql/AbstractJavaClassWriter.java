@@ -15,6 +15,10 @@ public abstract class AbstractJavaClassWriter {
 
 	protected static final Charset UTF8 = Charset.forName("UTF-8");
 
+	public static String capitalize(String word) {
+		return Character.toUpperCase(word.charAt(0)) + word.substring(1);
+	}
+
 	public abstract static class AbstractBuilder {
 
 		private SQL sql;
@@ -22,9 +26,11 @@ public abstract class AbstractJavaClassWriter {
 		private String className;
 		private String namespace;
 
+		protected TargetAPI api;
+
 		public AbstractBuilder setReader(Path file) throws IOException {
 			try (BufferedReader reader = newBufferedReader(file, UTF8)) {
-				this.sql = new SQL(reader);
+				sql = new SQL(api, reader);
 			}
 			return this;
 		}
@@ -42,6 +48,11 @@ public abstract class AbstractJavaClassWriter {
 
 		public AbstractBuilder setNamespace(String namespace) {
 			this.namespace = namespace;
+			return this;
+		}
+
+		public AbstractBuilder setTargetAPI(TargetAPI api) {
+			this.api = api;
 			return this;
 		}
 
@@ -78,10 +89,7 @@ public abstract class AbstractJavaClassWriter {
 		writer.writeEmptyLine();
 	}
 
-	protected void forEachImport(Consumer<String> action) {
-		action.accept("java.sql.Connection");
-		action.accept("com.github.ryanholdren.typesafesql.ConnectionHandling");
-	}
+	protected abstract void forEachImport(Consumer<String> action);
 
 	protected void writeImports() throws IOException {
 		final TreeSet<String> imports = new TreeSet<>();
@@ -98,8 +106,10 @@ public abstract class AbstractJavaClassWriter {
 	}
 
 	protected String getNameOfFirstInterface() {
-		return sql.firstParameter().map(Parameter::getNameOfInterface).orElse(sql.getClassNameOfExecutable());
+		return sql.firstParameter().map(Parameter::getNameOfInterface).orElse(getClassNameOfExecutable());
 	}
+
+	protected abstract String getClassNameOfExecutable();
 
 	protected void writeEndOfClass() throws IOException {
 		writer.writeLine("}");

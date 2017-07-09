@@ -1,29 +1,29 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
-class StringParameter extends Parameter {
+public class StringParameter extends Parameter {
 
 	public StringParameter(String argumentName) {
 		super(argumentName);
 	}
 
 	@Override
-	protected String getNameOfMethodInPreparedStatement() {
-		return "setString";
-	}
-
-	@Override
-	protected boolean isNullable() {
-		return true;
-	}
-
-	@Override
-	protected String getNameOfJDBCConstant() {
-		return "VARCHAR";
+	public <T,E extends Exception> T accept(ParameterVisitor<T,E> visitor) throws E {
+		return visitor.visit(this);
 	}
 
 	@Override
 	public String getArgumentType() {
 		return "String";
+	}
+
+	@Override
+	public String getCast() {
+		return "VARCHAR";
+	}
+
+	@Override
+	public boolean isNullable() {
+		return true;
 	}
 
 }

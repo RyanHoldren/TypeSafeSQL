@@ -1,29 +1,29 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
-class ByteArrayParameter extends Parameter {
+public class ByteArrayParameter extends Parameter {
 
 	public ByteArrayParameter(String argumentName) {
 		super(argumentName);
 	}
 
 	@Override
-	protected String getNameOfMethodInPreparedStatement() {
-		return "setBytes";
-	}
-
-	@Override
-	protected boolean isNullable() {
-		return true;
-	}
-
-	@Override
-	protected String getNameOfJDBCConstant() {
-		return "VARBINARY";
+	public <T,E extends Exception> T accept(ParameterVisitor<T,E> visitor) throws E {
+		return visitor.visit(this);
 	}
 
 	@Override
 	public String getArgumentType() {
 		return "byte[]";
+	}
+
+	@Override
+	public String getCast() {
+		return "bytea";
+	}
+
+	@Override
+	public boolean isNullable() {
+		return true;
 	}
 
 }
