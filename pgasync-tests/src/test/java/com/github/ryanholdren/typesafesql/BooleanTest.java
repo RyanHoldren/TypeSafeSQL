@@ -1,41 +1,47 @@
 package com.github.ryanholdren.typesafesql;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import org.junit.Test;
+import reactor.test.StepVerifier;
 
 public class BooleanTest extends FunctionalTest {
 
 	@Test
 	public void testTrueBooleanParameter() {
-		TestTrueBooleanParameter
-			.prepare()
-			.withInput(true)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestTrueBooleanParameter
+					.prepare()
+					.withInput(true)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testFalseBooleanParameter() {
-		TestFalseBooleanParameter
-			.prepare()
-			.withInput(false)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestFalseBooleanParameter
+					.prepare()
+					.withInput(false)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testNullBooleanParameter() {
-		TestNullBooleanParameter
-			.prepare()
-			.withoutInput()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestNullBooleanParameter
+					.prepare()
+					.withoutInput()
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 }

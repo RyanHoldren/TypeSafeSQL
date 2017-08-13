@@ -17,18 +17,20 @@ public class PgAsyncJavaClassWriter extends JavaClassWriter {
 		action.accept("com.github.pgasync.QueryExecutor");
 		switch (sql.getNumberOfColumns()) {
 			case 0:
-				action.accept("io.reactivex.Single");
+				action.accept("static com.github.ryanholdren.typesafesql.RxJavaToReactor.toFlux");
+				action.accept("reactor.core.publisher.Mono");
 				action.accept("com.github.pgasync.ResultSet");
 				break;
 			case 1:
-				action.accept("io.reactivex.Flowable");
+				action.accept("static com.github.ryanholdren.typesafesql.RxJavaToReactor.toFlux");
+				action.accept("reactor.core.publisher.Flux");
 				break;
 			default:
-				action.accept("io.reactivex.Flowable");
+				action.accept("static com.github.ryanholdren.typesafesql.RxJavaToReactor.toFlux");
+				action.accept("reactor.core.publisher.Flux");
 				action.accept("com.github.pgasync.Row");
 				break;
 		}
-		action.accept("static hu.akarnokd.rxjava.interop.RxJavaInterop.toV2Flowable");
 	}
 
 	@Override
@@ -105,39 +107,35 @@ public class PgAsyncJavaClassWriter extends JavaClassWriter {
 		if (sql.hasParameters()) {
 			switch (sql.getNumberOfColumns()) {
 				case 0:
-					writer.writeLine("return toV2Flowable(executor.querySet(SQL, parameters).map(ResultSet::updatedRows)).singleOrError();");
+					writer.writeLine("return toFlux(executor.querySet(SQL, parameters)).then();");
 					break;
 				case 1:
 					final ReturnFromRow extractor = new ReturnFromRow(writer);
-					writer.writeLine("return toV2Flowable(");
-					writer.writeLine("executor.queryRows(SQL, parameters).map(row -> {");
+					writer.writeLine("return toFlux(executor.queryRows(SQL, parameters).map(row -> {");
 					sql.forEachColumn(column -> {
 						column.accept(extractor);
 					});
-					writer.writeLine("})");
-					writer.writeLine(");");
+					writer.writeLine("}));");
 					break;
 				default:
-					writer.writeLine("return toV2Flowable(executor.queryRows(SQL, parameters).map(BasicResult::new));");
+					writer.writeLine("return toFlux(executor.queryRows(SQL, parameters).map(BasicResult::new));");
 					break;
 			}
 		} else {
 			switch (sql.getNumberOfColumns()) {
 				case 0:
-					writer.writeLine("return toV2Flowable(executor.querySet(SQL).map(ResultSet::updatedRows)).singleOrError();");
+					writer.writeLine("return toFlux(executor.querySet(SQL)).then();");
 					break;
 				case 1:
 					final ReturnFromRow extractor = new ReturnFromRow(writer);
-					writer.writeLine("return toV2Flowable(");
-					writer.writeLine("executor.queryRows(SQL).map(row -> {");
+					writer.writeLine("return toFlux(executor.queryRows(SQL).map(row -> {");
 					sql.forEachColumn(column -> {
 						column.accept(extractor);
 					});
-					writer.writeLine("})");
-					writer.writeLine(");");
+					writer.writeLine("}));");
 					break;
 				default:
-					writer.writeLine("return toV2Flowable(executor.queryRows(SQL).map(BasicResult::new));");
+					writer.writeLine("return toFlux(executor.queryRows(SQL).map(BasicResult::new));");
 					break;
 			}
 		}
@@ -158,12 +156,12 @@ public class PgAsyncJavaClassWriter extends JavaClassWriter {
 	protected String getReturnTypeOfExecute() {
 		switch (sql.getNumberOfColumns()) {
 			case 0:
-				return "Single<Integer>";
+				return "Mono<Void>";
 			case 1:
 				final ResultColumn onlyColumn = sql.getColumns().iterator().next();
-				return "Flowable<" + onlyColumn.getBoxedReturnType() + '>';
+				return "Flux<" + onlyColumn.getBoxedReturnType() + '>';
 			default:
-				return "Flowable<Result>";
+				return "Flux<Result>";
 		}
 	}
 

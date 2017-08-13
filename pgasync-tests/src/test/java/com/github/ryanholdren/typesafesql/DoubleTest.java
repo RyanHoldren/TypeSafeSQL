@@ -1,9 +1,9 @@
 package com.github.ryanholdren.typesafesql;
 
 import com.github.ryanholdren.typesafesql.TestTwoDoubleColumns.Result;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import reactor.test.StepVerifier;
 
 public class DoubleTest extends FunctionalTest {
 
@@ -13,63 +13,74 @@ public class DoubleTest extends FunctionalTest {
 
 	@Test
 	public void testDoubleParameter() {
-		TestDoubleParameter
-			.prepare()
-			.withInput(FIRST_EXPECTED_DOUBLE)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestDoubleParameter
+					.prepare()
+					.withInput(FIRST_EXPECTED_DOUBLE)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testNullDoubleParameter() {
-		TestNullDoubleParameter
-			.prepare()
-			.withoutInput()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestNullDoubleParameter
+					.prepare()
+					.withoutInput()
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testDoubleColumn() {
-		TestDoubleColumn
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(FIRST_EXPECTED_DOUBLE);
+		StepVerifier
+			.create(
+				TestDoubleColumn
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(FIRST_EXPECTED_DOUBLE)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testTwoDoubleColumns() {
-		TestTwoDoubleColumns
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(this::isExpectedResult);
-	}
-
-	@Test
-	public void testTwoDoubleRows() {
-		TestTwoDoubleRows
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValues(FIRST_EXPECTED_DOUBLE, SECOND_EXPECTED_DOUBLE);
+		StepVerifier
+			.create(
+				TestTwoDoubleColumns
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNextMatches(this::isExpectedResult)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	private boolean isExpectedResult(Result actual) {
 		assertEquals(FIRST_EXPECTED_DOUBLE, actual.getFirstOutput(), EPSILON);
 		assertEquals(SECOND_EXPECTED_DOUBLE, actual.getSecondOutput(), EPSILON);
 		return true;
+	}
+
+	@Test
+	public void testTwoDoubleRows() {
+		StepVerifier
+			.create(
+				TestTwoDoubleRows
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(FIRST_EXPECTED_DOUBLE)
+			.expectNext(SECOND_EXPECTED_DOUBLE)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 }

@@ -3,9 +3,10 @@ package com.github.ryanholdren.typesafesql;
 import com.github.ryanholdren.typesafesql.TestTwoOptionalDoubleColumns.Result;
 import java.util.OptionalDouble;
 import static java.util.OptionalDouble.empty;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.OptionalDouble.of;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import reactor.test.StepVerifier;
 
 public class OptionalDoubleTest extends FunctionalTest {
 
@@ -15,54 +16,61 @@ public class OptionalDoubleTest extends FunctionalTest {
 
 	@Test
 	public void testOptionalDoubleColumn() {
-		TestOptionalDoubleColumn
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(this::isFirstExpectedResult);
+		StepVerifier
+			.create(
+				TestOptionalDoubleColumn
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(of(FIRST_EXPECTED_DOUBLE))
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testNullOptionalDoubleResult() {
-		TestNullOptionalDoubleResult
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(empty());
+		StepVerifier
+			.create(
+				TestNullOptionalDoubleResult
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(empty())
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testTwoOptionalDoubleColumns() {
-		TestTwoOptionalDoubleColumns
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(this::isExpectedResult);
-	}
-
-	@Test
-	public void testTwoOptionalDoubleRows() {
-		TestTwoOptionalDoubleRows
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValueCount(2)
-			.assertValueAt(0, this::isFirstExpectedResult)
-			.assertValueAt(1, this::isSecondExpectedResult);
+		StepVerifier
+			.create(
+				TestTwoOptionalDoubleColumns
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNextMatches(this::isExpectedResult)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	private boolean isExpectedResult(Result actual) {
 		isFirstExpectedResult(actual.getFirstOutput());
 		isSecondExpectedResult(actual.getSecondOutput());
 		return true;
+	}
+
+	@Test
+	public void testTwoOptionalDoubleRows() {
+		StepVerifier
+			.create(
+				TestTwoOptionalDoubleRows
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNextMatches(this::isFirstExpectedResult)
+			.expectNextMatches(this::isSecondExpectedResult)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	private boolean isFirstExpectedResult(OptionalDouble actual) {

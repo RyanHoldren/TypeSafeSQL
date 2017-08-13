@@ -1,0 +1,5 @@
+CREATE TEMPORARY TABLE test AS (
+	SELECT 1 AS test
+);
+UPDATE test SET test = 42;
+SELECT {out:INTEGER:test} FROM test;

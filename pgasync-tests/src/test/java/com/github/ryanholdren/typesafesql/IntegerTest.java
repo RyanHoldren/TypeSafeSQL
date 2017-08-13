@@ -1,9 +1,9 @@
 package com.github.ryanholdren.typesafesql;
 
 import com.github.ryanholdren.typesafesql.TestTwoIntegerColumns.Result;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import reactor.test.StepVerifier;
 
 public class IntegerTest extends FunctionalTest {
 
@@ -12,63 +12,86 @@ public class IntegerTest extends FunctionalTest {
 
 	@Test
 	public void testIntegerParameter() {
-		TestIntegerParameter
-			.prepare()
-			.withInput(FIRST_EXPECTED_INTEGER)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestIntegerParameter
+					.prepare()
+					.withInput(FIRST_EXPECTED_INTEGER)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testNullIntegerParameter() {
-		TestNullIntegerParameter
-			.prepare()
-			.withoutInput()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestNullIntegerParameter
+					.prepare()
+					.withoutInput()
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testIntegerColumn() {
-		TestIntegerColumn
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(FIRST_EXPECTED_INTEGER);
+		StepVerifier
+			.create(
+				TestIntegerColumn
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(FIRST_EXPECTED_INTEGER)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testTwoIntegerColumns() {
-		TestTwoIntegerColumns
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(this::isExpectedResult);
-	}
-
-	@Test
-	public void testTwoIntRows() {
-		TestTwoIntegerRows
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValues(FIRST_EXPECTED_INTEGER, SECOND_EXPECTED_INTEGER);
+		StepVerifier
+			.create(
+				TestTwoIntegerColumns
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNextMatches(this::isExpectedResult)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	private boolean isExpectedResult(Result actual) {
 		assertEquals(FIRST_EXPECTED_INTEGER, actual.getFirstOutput());
 		assertEquals(SECOND_EXPECTED_INTEGER, actual.getSecondOutput());
 		return true;
+	}
+
+	@Test
+	public void testZeroIntegerRows() {
+		StepVerifier
+			.create(
+				TestZeroIntegerRows
+					.prepare()
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
+	}
+
+	@Test
+	public void testTwoIntegerRows() {
+		StepVerifier
+			.create(
+				TestTwoIntegerRows
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(FIRST_EXPECTED_INTEGER)
+			.expectNext(SECOND_EXPECTED_INTEGER)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 }

@@ -5,7 +5,8 @@ import com.github.pgasync.ConnectionPoolBuilder;
 import static com.opentable.db.postgres.junit.EmbeddedPostgresRules.preparedDatabase;
 import com.opentable.db.postgres.junit.PreparedDbRule;
 import java.sql.Connection;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import java.time.Duration;
+import static java.time.Duration.ofSeconds;
 import javax.sql.DataSource;
 import org.junit.After;
 import static org.junit.Assert.assertTrue;
@@ -13,8 +14,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
+import reactor.test.StepVerifier;
 
 public class FunctionalTest {
+
+	protected static final Duration TIMEOUT = ofSeconds(1);
 
 	@Rule
 	public final PreparedDbRule rule = preparedDatabase(source -> {
@@ -52,31 +56,34 @@ public class FunctionalTest {
 
 	@Test
 	public void testAssert() {
-		TestAssertShouldFail
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertError(error -> {
+		StepVerifier
+			.create(
+				TestAssertShouldFail
+					.prepare()
+					.executeIn(db)
+			)
+			.expectErrorMatches(error -> {
 				assertTrue(error.getMessage().contains("Assertion failed!"));
 				return true;
-			});
+			})
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testUpdate() {
-		TestUpdate
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(0);
+		StepVerifier
+			.create(
+				TestUpdate
+					.prepare()
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@After
 	public void closeConnectionPool() throws Exception {
-		// db.close();
+		db.close();
 	}
 
 }

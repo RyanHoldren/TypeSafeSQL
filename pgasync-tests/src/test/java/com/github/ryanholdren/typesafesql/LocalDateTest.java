@@ -2,9 +2,9 @@ package com.github.ryanholdren.typesafesql;
 
 import com.github.ryanholdren.typesafesql.TestTwoLocalDateColumns.Result;
 import java.time.LocalDate;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import reactor.test.StepVerifier;
 
 public class LocalDateTest extends FunctionalTest {
 
@@ -13,63 +13,74 @@ public class LocalDateTest extends FunctionalTest {
 
 	@Test
 	public void testLocalDateParameter() {
-		TestLocalDateParameter
-			.prepare()
-			.withInput(FIRST_EXPECTED_DATE)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestLocalDateParameter
+					.prepare()
+					.withInput(FIRST_EXPECTED_DATE)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testNullLocalDateParameter() {
-		TestNullLocalDateParameter
-			.prepare()
-			.withInput(null)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestNullLocalDateParameter
+					.prepare()
+					.withInput(null)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testLocalDateColumn() {
-		TestLocalDateColumn
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(FIRST_EXPECTED_DATE);
+		StepVerifier
+			.create(
+				TestLocalDateColumn
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(FIRST_EXPECTED_DATE)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testTwoLocalDateColumns() {
-		TestTwoLocalDateColumns
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(this::isExpectedResult);
-	}
-
-	@Test
-	public void testTwoLocalDateRows() {
-		TestTwoLocalDateRows
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValues(FIRST_EXPECTED_DATE, SECOND_EXPECTED_DATE);
+		StepVerifier
+			.create(
+				TestTwoLocalDateColumns
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNextMatches(this::isExpectedResult)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	private boolean isExpectedResult(Result actual) {
 		assertEquals(FIRST_EXPECTED_DATE, actual.getFirstOutput());
 		assertEquals(SECOND_EXPECTED_DATE, actual.getSecondOutput());
 		return true;
+	}
+
+	@Test
+	public void testTwoLocalDateRows() {
+		StepVerifier
+			.create(
+				TestTwoLocalDateRows
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(FIRST_EXPECTED_DATE)
+			.expectNext(SECOND_EXPECTED_DATE)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 }

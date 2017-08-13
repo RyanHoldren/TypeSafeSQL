@@ -1,7 +1,7 @@
 package com.github.ryanholdren.typesafesql;
 
-public interface TwoInputs {
-	default boolean isTwoInputs() {
+public interface TwoOutputs {
+	default boolean isTwoOutputs() {
 		return true;
 	}
 }

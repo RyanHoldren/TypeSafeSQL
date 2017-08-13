@@ -3,9 +3,9 @@ package com.github.ryanholdren.typesafesql;
 import com.github.ryanholdren.typesafesql.TestTwoUUIDColumns.Result;
 import java.util.UUID;
 import static java.util.UUID.fromString;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import reactor.test.StepVerifier;
 
 public class UUIDTest extends FunctionalTest {
 
@@ -14,63 +14,74 @@ public class UUIDTest extends FunctionalTest {
 
 	@Test
 	public void testUUIDParameter() {
-		TestUUIDParameter
-			.prepare()
-			.withInput(FIRST_EXPECTED_UUID)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestUUIDParameter
+					.prepare()
+					.withInput(FIRST_EXPECTED_UUID)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testNullUUIDParameter() {
-		TestNullUUIDParameter
-			.prepare()
-			.withInput(null)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestNullUUIDParameter
+					.prepare()
+					.withInput(null)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testUUIDColumn() {
-		TestUUIDColumn
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(FIRST_EXPECTED_UUID);
+		StepVerifier
+			.create(
+				TestUUIDColumn
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(FIRST_EXPECTED_UUID)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testTwoUUIDColumns() {
-		TestTwoUUIDColumns
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(this::isExpectedResult);
-	}
-
-	@Test
-	public void testTwoUUIDRows() {
-		TestTwoUUIDRows
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValues(FIRST_EXPECTED_UUID, SECOND_EXPECTED_UUID);
+		StepVerifier
+			.create(
+				TestTwoUUIDColumns
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNextMatches(this::isExpectedResult)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	private boolean isExpectedResult(Result actual) {
 		assertEquals(FIRST_EXPECTED_UUID, actual.getFirstOutput());
 		assertEquals(SECOND_EXPECTED_UUID, actual.getSecondOutput());
 		return true;
+	}
+
+	@Test
+	public void testTwoUUIDRows() {
+		StepVerifier
+			.create(
+				TestTwoUUIDRows
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(FIRST_EXPECTED_UUID)
+			.expectNext(SECOND_EXPECTED_UUID)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 }

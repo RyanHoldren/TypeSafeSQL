@@ -1,9 +1,9 @@
 package com.github.ryanholdren.typesafesql;
 
 import com.github.ryanholdren.typesafesql.TestTwoStringColumns.Result;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import reactor.test.StepVerifier;
 
 public class StringTest extends FunctionalTest {
 
@@ -12,63 +12,74 @@ public class StringTest extends FunctionalTest {
 
 	@Test
 	public void testStringParameter() {
-		TestStringParameter
-			.prepare()
-			.withInput(FIRST_EXPECTED_STRING)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestStringParameter
+					.prepare()
+					.withInput(FIRST_EXPECTED_STRING)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testNullStringParameter() {
-		TestNullStringParameter
-			.prepare()
-			.withInput(null)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestNullStringParameter
+					.prepare()
+					.withInput(null)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testStringResult() {
-		TestStringColumn
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(FIRST_EXPECTED_STRING);
+		StepVerifier
+			.create(
+				TestStringColumn
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(FIRST_EXPECTED_STRING)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testTwoStringColumns() {
-		TestTwoStringColumns
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(this::isExpectedResult);
-	}
-
-	@Test
-	public void testTwoStringRows() {
-		TestTwoStringRows
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValues(FIRST_EXPECTED_STRING, SECOND_EXPECTED_STRING);
+		StepVerifier
+			.create(
+				TestTwoStringColumns
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNextMatches(this::isExpectedResult)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	private boolean isExpectedResult(Result actual) {
 		assertEquals(FIRST_EXPECTED_STRING, actual.getFirstOutput());
 		assertEquals(SECOND_EXPECTED_STRING, actual.getSecondOutput());
 		return true;
+	}
+
+	@Test
+	public void testTwoStringRows() {
+		StepVerifier
+			.create(
+				TestTwoStringRows
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNext(FIRST_EXPECTED_STRING)
+			.expectNext(SECOND_EXPECTED_STRING)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 }

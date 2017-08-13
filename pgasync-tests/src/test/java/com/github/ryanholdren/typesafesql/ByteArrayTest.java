@@ -2,9 +2,9 @@ package com.github.ryanholdren.typesafesql;
 
 import com.github.ryanholdren.typesafesql.TestTwoByteArrayColumns.Result;
 import com.google.common.io.BaseEncoding;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertArrayEquals;
 import org.junit.Test;
+import reactor.test.StepVerifier;
 
 public class ByteArrayTest extends FunctionalTest {
 
@@ -13,65 +13,74 @@ public class ByteArrayTest extends FunctionalTest {
 
 	@Test
 	public void testByteArrayParameter() {
-		TestByteArrayParameter
-			.prepare()
-			.withInput(FIRST_EXPECTED_BYTE_ARRAY)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestByteArrayParameter
+					.prepare()
+					.withInput(FIRST_EXPECTED_BYTE_ARRAY)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testNullByteArrayParameter() {
-		TestNullByteArrayParameter
-			.prepare()
-			.withInput(null)
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors();
+		StepVerifier
+			.create(
+				TestNullByteArrayParameter
+					.prepare()
+					.withInput(null)
+					.executeIn(db)
+			)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testByteArrayColumn() {
-		TestByteArrayColumn
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(this::isFirstExpectedResult);
+		StepVerifier
+			.create(
+				TestByteArrayColumn
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNextMatches(this::isFirstExpectedResult)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	@Test
 	public void testTwoByteArrayColumns() {
-		TestTwoByteArrayColumns
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValue(this::isExpectedResult);
-	}
-
-	@Test
-	public void testTwoByteArrayRows() {
-		TestTwoByteArrayRows
-			.prepare()
-			.executeIn(db)
-			.test()
-			.awaitDone(1L, SECONDS)
-			.assertNoErrors()
-			.assertValueCount(2)
-			.assertValueAt(0, this::isFirstExpectedResult)
-			.assertValueAt(1, this::isSecondExpectedResult);
+		StepVerifier
+			.create(
+				TestTwoByteArrayColumns
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNextMatches(this::isExpectedResult)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	private boolean isExpectedResult(Result actual) {
 		isFirstExpectedResult(actual.getFirstOutput());
 		isSecondExpectedResult(actual.getSecondOutput());
 		return true;
+	}
+
+	@Test
+	public void testTwoByteArrayRows() {
+		StepVerifier
+			.create(
+				TestTwoByteArrayRows
+					.prepare()
+					.executeIn(db)
+			)
+			.expectNextMatches(this::isFirstExpectedResult)
+			.expectNextMatches(this::isSecondExpectedResult)
+			.expectComplete()
+			.verify(TIMEOUT);
 	}
 
 	private boolean isFirstExpectedResult(byte[] actual) {
