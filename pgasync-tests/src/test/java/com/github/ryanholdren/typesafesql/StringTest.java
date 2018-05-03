@@ -17,7 +17,7 @@ public class StringTest extends FunctionalTest {
 				TestStringParameter
 					.prepare()
 					.withInput(FIRST_EXPECTED_STRING)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -30,7 +30,7 @@ public class StringTest extends FunctionalTest {
 				TestNullStringParameter
 					.prepare()
 					.withInput(null)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -42,7 +42,7 @@ public class StringTest extends FunctionalTest {
 			.create(
 				TestStringColumn
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_STRING)
 			.expectComplete()
@@ -55,7 +55,7 @@ public class StringTest extends FunctionalTest {
 			.create(
 				TestTwoStringColumns
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNextMatches(this::isExpectedResult)
 			.expectComplete()
@@ -74,7 +74,7 @@ public class StringTest extends FunctionalTest {
 			.create(
 				TestTwoStringRows
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_STRING)
 			.expectNext(SECOND_EXPECTED_STRING)

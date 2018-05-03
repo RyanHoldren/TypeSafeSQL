@@ -1,7 +1,5 @@
 package com.github.ryanholdren.typesafesql;
 
-import com.github.ryanholdren.typesafesql.AbstractJavaClassWriter.AbstractBuilder;
-import com.github.ryanholdren.typesafesql.jdbc.JDBCClassWriter;
 import java.util.List;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -10,7 +8,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 
 @Mojo(name = "write-classes-from-sql", defaultPhase = GENERATE_SOURCES, threadSafe = true)
 public class WriteClassesFromSQLMojo extends AbstractSQLMojo {
-
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		final String target = project.getBuild().getDirectory();
@@ -19,10 +16,4 @@ public class WriteClassesFromSQLMojo extends AbstractSQLMojo {
 		process(input, output);
 		project.addCompileSourceRoot(output);
 	}
-
-	@Override
-	protected AbstractBuilder newClassWriterBuilder() {
-		return JDBCClassWriter.newBuilder();
-	}
-
 }

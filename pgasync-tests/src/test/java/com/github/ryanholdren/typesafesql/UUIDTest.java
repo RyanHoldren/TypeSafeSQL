@@ -19,7 +19,7 @@ public class UUIDTest extends FunctionalTest {
 				TestUUIDParameter
 					.prepare()
 					.withInput(FIRST_EXPECTED_UUID)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -32,7 +32,7 @@ public class UUIDTest extends FunctionalTest {
 				TestNullUUIDParameter
 					.prepare()
 					.withInput(null)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -44,7 +44,7 @@ public class UUIDTest extends FunctionalTest {
 			.create(
 				TestUUIDColumn
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_UUID)
 			.expectComplete()
@@ -57,7 +57,7 @@ public class UUIDTest extends FunctionalTest {
 			.create(
 				TestTwoUUIDColumns
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNextMatches(this::isExpectedResult)
 			.expectComplete()
@@ -76,7 +76,7 @@ public class UUIDTest extends FunctionalTest {
 			.create(
 				TestTwoUUIDRows
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_UUID)
 			.expectNext(SECOND_EXPECTED_UUID)

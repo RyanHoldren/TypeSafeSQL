@@ -27,84 +27,85 @@ class ExtractFromRow implements ResultColumnVisitor<Void, IOException> {
 
 	@Override
 	public Void visit(BigDecimalResultColumn column) throws IOException {
-		writer.writeLine("this.", column.getName(), " = row.getBigDecimal(" + column.getIndex() + ");");
+		writer.writeLine("return row.getBigDecimal(" + column.getIndex() + ");");
 		return null;
 	}
 
 	@Override
 	public Void visit(BooleanResultColumn column) throws IOException {
-		writer.writeLine("this.", column.getName(), " = row.getBoolean(" + column.getIndex() + ");");
+		writer.writeLine("return row.getBoolean(" + column.getIndex() + ");");
 		return null;
 	}
 
 	@Override
 	public Void visit(ByteArrayResultColumn column) throws IOException {
-		writer.writeLine("this.", column.getName(), " = row.getBytes(" + column.getIndex() + ");");
+		writer.writeLine("return row.getBytes(" + column.getIndex() + ");");
 		return null;
 	}
 
 	@Override
 	public Void visit(DoubleResultColumn column) throws IOException {
-		writer.writeLine("this.", column.getName(), " = row.getDouble(" + column.getIndex() + ");");
+		writer.writeLine("return row.getDouble(" + column.getIndex() + ");");
 		return null;
 	}
 
 	@Override
 	public Void visit(InstantResultColumn column) throws IOException {
 		writer.writeLine("final Timestamp ", column.getName(), " = row.getTimestamp(" + column.getIndex() + ");");
-		writer.writeLine("this.", column.getName(), " = ", column.getName(), " == null ? null : ", column.getName(), ".toInstant();");
+		writer.writeLine("return ", column.getName(), " == null ? null : ", column.getName(), ".toInstant();");
 		return null;
 	}
 
 	@Override
-	public Void visit(IntegerResultColumn column) throws IOException {		writer.writeLine("this.", column.getName(), " = row.getInt(" + column.getIndex() + ");");
+	public Void visit(IntegerResultColumn column) throws IOException {
+		writer.writeLine("return row.getInt(" + column.getIndex() + ");");
 		return null;
 	}
 
 	@Override
 	public Void visit(LocalDateResultColumn column) throws IOException {
 		writer.writeLine("final Date ", column.getName(), " = row.getDate(" + column.getIndex() + ");");
-		writer.writeLine("this.", column.getName(), " = ", column.getName(), " == null ? null : ", column.getName(), ".toLocalDate();");
+		writer.writeLine("return ", column.getName(), " == null ? null : ", column.getName(), ".toLocalDate();");
 		return null;
 	}
 
 	@Override
 	public Void visit(LongResultColumn column) throws IOException {
-		writer.writeLine("this.", column.getName(), " = row.getLong(" + column.getIndex() + ").longValue();");
+		writer.writeLine("return row.getLong(" + column.getIndex() + ").longValue();");
 		return null;
 	}
 
 	@Override
 	public Void visit(OptionalDoubleResultColumn column) throws IOException {
 		writer.writeLine("final Double ", column.getName(), " = row.getDouble(" + column.getIndex() + ");");
-		writer.writeLine("this.", column.getName(), " = ", column.getName(), " == null ? OptionalDouble.empty() : OptionalDouble.of(", column.getName(), ");");
+		writer.writeLine("return ", column.getName(), " == null ? OptionalDouble.empty() : OptionalDouble.of(", column.getName(), ");");
 		return null;
 	}
 
 	@Override
 	public Void visit(OptionalIntegerResultColumn column) throws IOException {
 		writer.writeLine("final Integer ", column.getName(), " = row.getInt(" + column.getIndex() + ");");
-		writer.writeLine("this.", column.getName(), " = ", column.getName(), " == null ? OptionalInt.empty() : OptionalInt.of(", column.getName(), ");");
+		writer.writeLine("return ", column.getName(), " == null ? OptionalInt.empty() : OptionalInt.of(", column.getName(), ");");
 		return null;
 	}
 
 	@Override
 	public Void visit(OptionalLongResultColumn column) throws IOException {
 		writer.writeLine("final Long ", column.getName(), " = row.getLong(" + column.getIndex() + ");");
-		writer.writeLine("this.", column.getName(), " = ", column.getName(), " == null ? OptionalLong.empty() : OptionalLong.of(", column.getName(), ");");
+		writer.writeLine("return ", column.getName(), " == null ? OptionalLong.empty() : OptionalLong.of(", column.getName(), ");");
 		return null;
 	}
 
 	@Override
 	public Void visit(StringResultColumn column) throws IOException {
-		writer.writeLine("this.", column.getName(), " = row.getString(" + column.getIndex() + ");");
+		writer.writeLine("return row.getString(" + column.getIndex() + ");");
 		return null;
 	}
 
 	@Override
 	public Void visit(UUIDResultColumn column) throws IOException {
 		writer.writeLine("final String ", column.getName(), " = row.getString(" + column.getIndex() + ");");
-		writer.writeLine("this.", column.getName(), " = ", column.getName(), " == null ? null : UUID.fromString(", column.getName(), ");");
+		writer.writeLine("return ", column.getName(), " == null ? null : UUID.fromString(", column.getName(), ");");
 		return null;
 	}
 

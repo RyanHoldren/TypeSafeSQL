@@ -2,7 +2,7 @@ package com.github.ryanholdren.typesafesql;
 
 import org.junit.Test;
 import rx.Observable;
-import static com.github.ryanholdren.typesafesql.RxJavaToReactor.toFlux;
+import static com.github.ryanholdren.typesafesql.Utilities.toFlux;
 import static java.lang.Long.MAX_VALUE;
 import static java.time.Duration.ofSeconds;
 import java.util.concurrent.CountDownLatch;

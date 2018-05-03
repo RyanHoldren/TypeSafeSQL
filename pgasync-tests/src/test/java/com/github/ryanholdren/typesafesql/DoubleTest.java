@@ -18,7 +18,7 @@ public class DoubleTest extends FunctionalTest {
 				TestDoubleParameter
 					.prepare()
 					.withInput(FIRST_EXPECTED_DOUBLE)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -31,7 +31,7 @@ public class DoubleTest extends FunctionalTest {
 				TestNullDoubleParameter
 					.prepare()
 					.withoutInput()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -43,7 +43,7 @@ public class DoubleTest extends FunctionalTest {
 			.create(
 				TestDoubleColumn
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_DOUBLE)
 			.expectComplete()
@@ -56,7 +56,7 @@ public class DoubleTest extends FunctionalTest {
 			.create(
 				TestTwoDoubleColumns
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNextMatches(this::isExpectedResult)
 			.expectComplete()
@@ -75,7 +75,7 @@ public class DoubleTest extends FunctionalTest {
 			.create(
 				TestTwoDoubleRows
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_DOUBLE)
 			.expectNext(SECOND_EXPECTED_DOUBLE)

@@ -20,7 +20,7 @@ public class OptionalDoubleTest extends FunctionalTest {
 			.create(
 				TestOptionalDoubleColumn
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(of(FIRST_EXPECTED_DOUBLE))
 			.expectComplete()
@@ -33,7 +33,7 @@ public class OptionalDoubleTest extends FunctionalTest {
 			.create(
 				TestNullOptionalDoubleResult
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(empty())
 			.expectComplete()
@@ -46,7 +46,7 @@ public class OptionalDoubleTest extends FunctionalTest {
 			.create(
 				TestTwoOptionalDoubleColumns
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNextMatches(this::isExpectedResult)
 			.expectComplete()
@@ -65,7 +65,7 @@ public class OptionalDoubleTest extends FunctionalTest {
 			.create(
 				TestTwoOptionalDoubleRows
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNextMatches(this::isFirstExpectedResult)
 			.expectNextMatches(this::isSecondExpectedResult)

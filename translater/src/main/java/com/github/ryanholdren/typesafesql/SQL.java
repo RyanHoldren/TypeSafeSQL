@@ -112,7 +112,7 @@ public class SQL {
 		});
 	}
 
-	public boolean hasParameters() {
+	public boolean needsParameterInterface() {
 		return parameters.isEmpty() == false;
 	}
 
@@ -147,7 +147,7 @@ public class SQL {
 
 	@FunctionalInterface
 	public interface ParameterConsumer<E extends Exception> {
-		void accept(Parameter parameter, Parameter next) throws E;
+		void accept(Parameter parameter) throws E;
 	}
 
 	public <E extends Exception> void forEachParameter(ParameterConsumer<E> action) throws E {
@@ -161,7 +161,7 @@ public class SQL {
 				} else {
 					next = null;
 				}
-				action.accept(current, next);
+				action.accept(current);
 				current = next;
 			} while (current != null);
 		}
@@ -175,7 +175,7 @@ public class SQL {
 		return columns.size();
 	}
 
-	public boolean needsResultClass() {
+	public boolean needsResultInterface() {
 		return columns.size() > 1;
 	}
 

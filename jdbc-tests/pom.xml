@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.github.ryanholdren.typesafesql</groupId>
 		<artifactId>parent</artifactId>
-		<version>2017-07-12</version>
+		<version>2018-01-19</version>
 	</parent>
 	<artifactId>jdbc-tests</artifactId>
 	<name>TypeSafeSQL JDBC Tests</name>
@@ -14,12 +14,12 @@
 		<dependency>
 			<groupId>com.github.ryanholdren.typesafesql</groupId>
 			<artifactId>jdbc-framework</artifactId>
-			<version>2017-07-12</version>
+			<version>2018-01-19</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ryanholdren.typesafesql</groupId>
 			<artifactId>jdbc-mocking</artifactId>
-			<version>2017-07-12</version>
+			<version>2018-01-19</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -41,7 +41,7 @@
 			<plugin>
 				<groupId>com.github.ryanholdren.typesafesql</groupId>
 				<artifactId>maven-plugin</artifactId>
-				<version>2017-07-12</version>
+				<version>2018-01-19</version>
 				<executions>
 					<execution>
 						<goals>

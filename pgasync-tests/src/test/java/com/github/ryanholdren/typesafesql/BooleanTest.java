@@ -9,10 +9,11 @@ public class BooleanTest extends FunctionalTest {
 	public void testTrueBooleanParameter() {
 		StepVerifier
 			.create(
-				TestTrueBooleanParameter
-					.prepare()
+				database
+					.testTrueBooleanParameter()
 					.withInput(true)
-					.executeIn(db)
+					.prepare()
+					.execute()
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -22,23 +23,11 @@ public class BooleanTest extends FunctionalTest {
 	public void testFalseBooleanParameter() {
 		StepVerifier
 			.create(
-				TestFalseBooleanParameter
-					.prepare()
+				database
+					.testFalseBooleanParameter()
 					.withInput(false)
-					.executeIn(db)
-			)
-			.expectComplete()
-			.verify(TIMEOUT);
-	}
-
-	@Test
-	public void testNullBooleanParameter() {
-		StepVerifier
-			.create(
-				TestNullBooleanParameter
 					.prepare()
-					.withoutInput()
-					.executeIn(db)
+					.execute()
 			)
 			.expectComplete()
 			.verify(TIMEOUT);

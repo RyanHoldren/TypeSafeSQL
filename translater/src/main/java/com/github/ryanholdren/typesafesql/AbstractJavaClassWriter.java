@@ -1,8 +1,9 @@
 package com.github.ryanholdren.typesafesql;
 
-import com.github.ryanholdren.typesafesql.parameters.Parameter;
 import java.io.BufferedReader;
 import java.io.IOException;
+import static java.lang.Character.toLowerCase;
+import static java.lang.Character.toUpperCase;
 import java.nio.charset.Charset;
 import static java.nio.file.Files.*;
 import java.nio.file.Path;
@@ -16,7 +17,11 @@ public abstract class AbstractJavaClassWriter {
 	protected static final Charset UTF8 = Charset.forName("UTF-8");
 
 	public static String capitalize(String word) {
-		return Character.toUpperCase(word.charAt(0)) + word.substring(1);
+		return toUpperCase(word.charAt(0)) + word.substring(1);
+	}
+
+	public static String uncapitalize(String word) {
+		return toLowerCase(word.charAt(0)) + word.substring(1);
 	}
 
 	public abstract static class AbstractBuilder {
@@ -101,15 +106,9 @@ public abstract class AbstractJavaClassWriter {
 	}
 
 	protected void writeStartOfClass() throws IOException {
-		writer.writeLine("public final class ", className, " {");
+		writer.writeLine("public interface ", className, " {");
 		writer.writeEmptyLine();
 	}
-
-	protected String getNameOfFirstInterface() {
-		return sql.firstParameter().map(Parameter::getNameOfInterface).orElse(getClassNameOfExecutable());
-	}
-
-	protected abstract String getClassNameOfExecutable();
 
 	protected void writeEndOfClass() throws IOException {
 		writer.writeLine("}");

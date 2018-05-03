@@ -12,58 +12,58 @@ import com.github.ryanholdren.typesafesql.parameters.ParameterVisitor;
 import com.github.ryanholdren.typesafesql.parameters.StringParameter;
 import com.github.ryanholdren.typesafesql.parameters.UUIDParameter;
 
-public enum Setter implements ParameterVisitor<String, RuntimeException> {
+public enum ToObjectFromParameters implements ParameterVisitor<String, RuntimeException> {
 
-	INSTANCE;
+	TO_OBJECT_FROM_PARAMETERS;
 
 	@Override
 	public String visit(BigDecimalParameter column) {
-		return column.getName();
+		return "get" + column.getCapitalizedName() + "()";
 	}
 
 	@Override
 	public String visit(BooleanParameter column) {
-		return column.getName();
+		return "get" + column.getCapitalizedName() + "()";
 	}
 
 	@Override
 	public String visit(ByteArrayParameter column) {
-		return column.getName();
+		return "get" + column.getCapitalizedName() + "()";
 	}
 
 	@Override
 	public String visit(DoubleParameter column) {
-		return column.getName();
+		return "get" + column.getCapitalizedName() + "()";
 	}
 
 	@Override
 	public String visit(InstantParameter column) {
-		return column.getName() + " == null ? null : Timestamp.from(" + column.getName() + ')';
+		return "toSql(get" + column.getCapitalizedName() + "())";
 	}
 
 	@Override
 	public String visit(IntegerParameter column) {
-		return column.getName();
+		return "get" + column.getCapitalizedName() + "()";
 	}
 
 	@Override
 	public String visit(LocalDateParameter column) {
-		return column.getName() + " == null ? null : Date.valueOf(" + column.getName() + ')';
+		return "toSql(get" + column.getCapitalizedName() + "())";
 	}
 
 	@Override
 	public String visit(LongParameter column) {
-		return column.getName();
+		return "get" + column.getCapitalizedName() + "()";
 	}
 
 	@Override
 	public String visit(UUIDParameter column) {
-		return column.getName() + " == null ? null : " + column.getName() + ".toString()";
+		return "toSql(get" + column.getCapitalizedName() + "())";
 	}
 
 	@Override
 	public String visit(StringParameter column) {
-		return column.getName();
+		return "get" + column.getCapitalizedName() + "()";
 	}
 
 }

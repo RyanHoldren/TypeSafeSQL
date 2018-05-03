@@ -17,7 +17,7 @@ public class IntegerTest extends FunctionalTest {
 				TestIntegerParameter
 					.prepare()
 					.withInput(FIRST_EXPECTED_INTEGER)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -30,7 +30,7 @@ public class IntegerTest extends FunctionalTest {
 				TestNullIntegerParameter
 					.prepare()
 					.withoutInput()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -42,7 +42,7 @@ public class IntegerTest extends FunctionalTest {
 			.create(
 				TestIntegerColumn
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_INTEGER)
 			.expectComplete()
@@ -55,7 +55,7 @@ public class IntegerTest extends FunctionalTest {
 			.create(
 				TestTwoIntegerColumns
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNextMatches(this::isExpectedResult)
 			.expectComplete()
@@ -74,7 +74,7 @@ public class IntegerTest extends FunctionalTest {
 			.create(
 				TestZeroIntegerRows
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -86,7 +86,7 @@ public class IntegerTest extends FunctionalTest {
 			.create(
 				TestTwoIntegerRows
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_INTEGER)
 			.expectNext(SECOND_EXPECTED_INTEGER)

@@ -11,7 +11,7 @@ public class CompositeQueryTest extends FunctionalTest {
 			.create(
 				TestCreateThenSelect
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(42)
 			.expectComplete()
@@ -24,7 +24,7 @@ public class CompositeQueryTest extends FunctionalTest {
 			.create(
 				TestMultipleInserts
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);

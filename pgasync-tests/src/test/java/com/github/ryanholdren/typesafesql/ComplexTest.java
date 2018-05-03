@@ -15,13 +15,14 @@ public class ComplexTest extends FunctionalTest {
 	public void testTwoComplexRows() {
 		StepVerifier
 			.create(
-				TestTwoComplexRows
-					.prepare()
+				database
+					.testTwoComplexRows()
 					.withFirstInput(FIRST_EXPECTED_INTEGER)
 					.withSecondInput(FIRST_EXPECTED_STRING)
 					.withThirdInput(SECOND_EXPECTED_INTEGER)
 					.withFourthInput(SECOND_EXPECTED_STRING)
-					.executeIn(db)
+					.prepare()
+					.execute()
 			)
 			.expectNextMatches(actual -> {
 				assertEquals(FIRST_EXPECTED_INTEGER, actual.getFirstOutput());
@@ -40,11 +41,7 @@ public class ComplexTest extends FunctionalTest {
 	@Test
 	public void testZeroComplexRows() throws InterruptedException {
 		StepVerifier
-			.create(
-				TestZeroComplexRows
-					.prepare()
-					.executeIn(db)
-			)
+			.create(database.testZeroComplexRows())
 			.expectComplete()
 			.verify(TIMEOUT);
 	}

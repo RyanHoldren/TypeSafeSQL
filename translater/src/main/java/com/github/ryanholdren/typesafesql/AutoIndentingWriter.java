@@ -6,7 +6,7 @@ import java.io.Writer;
 
 public class AutoIndentingWriter extends Writer {
 
-	private static final String NEW_LINE = System.getProperty("line.separator");
+	public static final String NEW_LINE = System.getProperty("line.separator");
 	private static final char LAST_CHARACTER_OF_LINE_BREAK = NEW_LINE.charAt(NEW_LINE.length() - 1);
 
 	private final BufferedWriter writer;

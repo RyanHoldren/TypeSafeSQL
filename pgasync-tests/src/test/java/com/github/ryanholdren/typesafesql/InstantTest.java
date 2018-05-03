@@ -20,7 +20,7 @@ public class InstantTest extends FunctionalTest {
 				TestInstantParameter
 					.prepare()
 					.withInput(FIRST_EXPECTED_INSTANT)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -33,7 +33,7 @@ public class InstantTest extends FunctionalTest {
 				TestNullInstantParameter
 					.prepare()
 					.withInput(null)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -46,7 +46,7 @@ public class InstantTest extends FunctionalTest {
 			.create(
 				TestInstantColumn
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_INSTANT)
 			.expectComplete()
@@ -60,7 +60,7 @@ public class InstantTest extends FunctionalTest {
 			.create(
 				TestTwoInstantColumns
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNextMatches(this::isExpectedResult)
 			.expectComplete()
@@ -80,7 +80,7 @@ public class InstantTest extends FunctionalTest {
 			.create(
 				TestTwoInstantRows
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_INSTANT)
 			.expectNext(SECOND_EXPECTED_INSTANT)

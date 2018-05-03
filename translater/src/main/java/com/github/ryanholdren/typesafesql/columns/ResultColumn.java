@@ -1,5 +1,7 @@
 package com.github.ryanholdren.typesafesql.columns;
 
+import static com.github.ryanholdren.typesafesql.AbstractJavaClassWriter.capitalize;
+
 public abstract class ResultColumn {
 
 	protected final int position;
@@ -20,6 +22,10 @@ public abstract class ResultColumn {
 
 	public String getName() {
 		return name;
+	}
+
+	public String getCapitalizedName() {
+		return capitalize(name);
 	}
 
 	public abstract String getReturnType();

@@ -18,7 +18,7 @@ public class ByteArrayTest extends FunctionalTest {
 				TestByteArrayParameter
 					.prepare()
 					.withInput(FIRST_EXPECTED_BYTE_ARRAY)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -31,7 +31,7 @@ public class ByteArrayTest extends FunctionalTest {
 				TestNullByteArrayParameter
 					.prepare()
 					.withInput(null)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -43,7 +43,7 @@ public class ByteArrayTest extends FunctionalTest {
 			.create(
 				TestByteArrayColumn
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNextMatches(this::isFirstExpectedResult)
 			.expectComplete()
@@ -56,7 +56,7 @@ public class ByteArrayTest extends FunctionalTest {
 			.create(
 				TestTwoByteArrayColumns
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNextMatches(this::isExpectedResult)
 			.expectComplete()
@@ -75,7 +75,7 @@ public class ByteArrayTest extends FunctionalTest {
 			.create(
 				TestTwoByteArrayRows
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNextMatches(this::isFirstExpectedResult)
 			.expectNextMatches(this::isSecondExpectedResult)

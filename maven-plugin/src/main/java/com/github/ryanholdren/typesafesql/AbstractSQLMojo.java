@@ -1,8 +1,11 @@
 package com.github.ryanholdren.typesafesql;
 
-import com.github.ryanholdren.typesafesql.AbstractJavaClassWriter.AbstractBuilder;
+import static com.github.ryanholdren.typesafesql.AbstractJavaClassWriter.UTF8;
+import static com.github.ryanholdren.typesafesql.AutoIndentingWriter.NEW_LINE;
+import static com.github.ryanholdren.typesafesql.JavaClassWriter.newBuilder;
 import static java.io.File.separator;
 import java.io.IOException;
+import java.io.Writer;
 import static java.lang.System.lineSeparator;
 import java.nio.file.FileVisitResult;
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -10,9 +13,13 @@ import static java.nio.file.Files.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
+import java.util.ArrayList;
 import static java.util.Collections.newSetFromMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,6 +63,7 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 		final ExecutorService executor = createExectutorService();
 		try {
 			final Set<Path> javaPaths = newSetFromMap(new ConcurrentHashMap<>());
+			final List<String> interfaces = new ArrayList<>();
 			final LongAdder created = new LongAdder();
 			final LongAdder updated = new LongAdder();
 			final LongAdder skipped = new LongAdder();
@@ -72,6 +80,9 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 						if (sqlPath.toString().endsWith(".sql")) {
 							final Path javaPath = getJavaPathFrom(sqlPath, sqlPathRoot, javaPathRoot);
 							javaPaths.add(javaPath);
+							final String namespace = getNamespaceFrom(javaPath, javaPathRoot);
+							final String className = getClassNameFrom(javaPath);
+							interfaces.add(namespace + '.' + className);
 							if (exists(javaPath)) {
 								final Instant lastModified = getLastModifiedTime(sqlPath).toInstant();
 								final Instant lastGenerated = getLastModifiedTime(javaPath).toInstant();
@@ -87,10 +98,10 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 							executor.submit(() -> {
 								try {
 									log.info("Processing '" + sqlPath + "' into '" + javaPath + "'...");
-									newClassWriterBuilder()
+									newBuilder()
 										.setTargetAPI(api)
-										.setNamespace(getNamespaceFrom(javaPath, javaPathRoot))
-										.setClassName(getClassNameFrom(javaPath))
+										.setNamespace(namespace)
+										.setClassName(className)
 										.setReader(sqlPath)
 										.setWriter(javaPath)
 										.writeClass();
@@ -102,6 +113,34 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 						return CONTINUE;
 					}
 				});
+			}
+			final String namespace = getNamespaceFrom(interfaces);
+			final Path pathToDatabaseFile = Paths.get(javaPathRoot, namespace.replace(".", separator), "Database.java");
+			javaPaths.add(pathToDatabaseFile);
+			try {
+				log.info("Updating Database interface '" + pathToDatabaseFile + "'...");
+				createDirectories(pathToDatabaseFile.getParent());
+				try (final Writer writer = newBufferedWriter(pathToDatabaseFile, UTF8, CREATE, TRUNCATE_EXISTING)) {
+					writer.write("package ");
+					writer.write(namespace);
+					writer.write(';');
+					writer.write(NEW_LINE);
+					writer.write(NEW_LINE);
+					writer.write("public interface Database extends");
+					final Iterator<String> iterator = interfaces.iterator();
+					while (iterator.hasNext()) {
+						writer.write(NEW_LINE);
+						writer.write('\t');
+						writer.write(iterator.next());
+						if (iterator.hasNext()) {
+							writer.write(',');
+						}
+					}
+					writer.write(" {}");
+					writer.write(NEW_LINE);
+				}
+			} catch (Exception exception) {
+				log.error("An error occurred while writing Database interface: " + exception);
 			}
 			executor.shutdown();
 			if (executor.awaitTermination(1L, HOURS) == false) {
@@ -160,7 +199,43 @@ public abstract class AbstractSQLMojo extends AbstractMojo {
 		);
 	}
 
-	protected abstract AbstractBuilder newClassWriterBuilder();
+	protected String getNamespaceFrom(List<String> fullyQualifiedClassNames) {
+		final String prefix = longestCommonPrefix(fullyQualifiedClassNames);
+		return prefix.substring(0, prefix.lastIndexOf('.'));
+	}
+
+	public String longestCommonPrefix(List<String> strings) {
+		final int numberOfStrings = strings.size();
+		if (strings == null || numberOfStrings == 0) {
+			return "";
+		}
+
+		if (numberOfStrings == 1) {
+			for (String string : strings) {
+				return string;
+			}
+		}
+
+		int minimumLength = numberOfStrings + 1;
+
+		for (String str : strings) {
+			if (minimumLength > str.length()) {
+				minimumLength = str.length();
+			}
+		}
+
+		for (int x = 0; x < minimumLength; x++) {
+			for (int y = 0; y < numberOfStrings - 1; y++) {
+				String s1 = strings.get(y);
+				String s2 = strings.get(y + 1);
+				if (s1.charAt(x) != s2.charAt(x)) {
+					return s1.substring(0, x);
+				}
+			}
+		}
+
+		return strings.get(0).substring(0, minimumLength);
+	}
 
 	private ExecutorService createExectutorService() {
 		final AtomicInteger numberOfThreads = new AtomicInteger(0);

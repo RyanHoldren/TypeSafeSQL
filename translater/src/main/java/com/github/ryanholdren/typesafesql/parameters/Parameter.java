@@ -1,12 +1,9 @@
 package com.github.ryanholdren.typesafesql.parameters;
 
+import static com.github.ryanholdren.typesafesql.AbstractJavaClassWriter.capitalize;
 import java.util.HashSet;
 
 public abstract class Parameter {
-
-	public static String capitalize(String word) {
-		return Character.toUpperCase(word.charAt(0)) + word.substring(1);
-	}
 
 	private final String name;
 	private final String capitalizedName;

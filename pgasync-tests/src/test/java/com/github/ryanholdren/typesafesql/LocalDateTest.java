@@ -18,7 +18,7 @@ public class LocalDateTest extends FunctionalTest {
 				TestLocalDateParameter
 					.prepare()
 					.withInput(FIRST_EXPECTED_DATE)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -31,7 +31,7 @@ public class LocalDateTest extends FunctionalTest {
 				TestNullLocalDateParameter
 					.prepare()
 					.withInput(null)
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectComplete()
 			.verify(TIMEOUT);
@@ -43,7 +43,7 @@ public class LocalDateTest extends FunctionalTest {
 			.create(
 				TestLocalDateColumn
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_DATE)
 			.expectComplete()
@@ -56,7 +56,7 @@ public class LocalDateTest extends FunctionalTest {
 			.create(
 				TestTwoLocalDateColumns
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNextMatches(this::isExpectedResult)
 			.expectComplete()
@@ -75,7 +75,7 @@ public class LocalDateTest extends FunctionalTest {
 			.create(
 				TestTwoLocalDateRows
 					.prepare()
-					.executeIn(db)
+					.executeIn(database)
 			)
 			.expectNext(FIRST_EXPECTED_DATE)
 			.expectNext(SECOND_EXPECTED_DATE)

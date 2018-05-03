@@ -4,21 +4,27 @@
 	<parent>
 		<groupId>com.github.ryanholdren.typesafesql</groupId>
 		<artifactId>parent</artifactId>
-		<version>2017-07-12</version>
+		<version>2018-01-19</version>
 	</parent>
 	<artifactId>pgasync-framework</artifactId>
 	<name>TypeSafeSQL PgAsync Framework</name>
 	<packaging>jar</packaging>
+        <repositories>
+            <repository>
+                <id>jitpack.io</id>
+                <url>https://jitpack.io</url>
+            </repository>
+        </repositories>
 	<dependencies>
 		<dependency>
 			<groupId>com.github.ryanholdren.typesafesql</groupId>
 			<artifactId>framework</artifactId>
-			<version>2017-07-12</version>
+			<version>2018-01-19</version>
 		</dependency>
 		<dependency>
-			<groupId>com.github.alaisi.pgasync</groupId>
+			<groupId>com.github.RyanHoldren</groupId>
 			<artifactId>postgres-async-driver</artifactId>
-			<version>0.10.ryan</version>
+			<version>fe19b1bd2030fe8dadb94a4958a130c7d436a134</version>
 		</dependency>
 		<dependency>
 			<groupId>io.projectreactor</groupId>

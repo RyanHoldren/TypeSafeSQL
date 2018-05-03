@@ -47,21 +47,19 @@ public class FunctionalTest {
 			.build();
 	}
 
-	protected ConnectionPool db;
+	private ConnectionPool db;
+	protected Database database;
 
 	@Before
 	public void createConnectionPool() {
 		db = toDb(rule.getTestDatabase());
+		database = () -> db;
 	}
 
 	@Test
 	public void testAssert() {
 		StepVerifier
-			.create(
-				TestAssertShouldFail
-					.prepare()
-					.executeIn(db)
-			)
+			.create(database.testAssertShouldFail())
 			.expectErrorMatches(error -> {
 				assertTrue(error.getMessage().contains("Assertion failed!"));
 				return true;
@@ -72,11 +70,7 @@ public class FunctionalTest {
 	@Test
 	public void testUpdate() {
 		StepVerifier
-			.create(
-				TestUpdate
-					.prepare()
-					.executeIn(db)
-			)
+			.create(database.testUpdate())
 			.expectComplete()
 			.verify(TIMEOUT);
 	}
