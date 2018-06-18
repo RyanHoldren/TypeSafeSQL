@@ -42,7 +42,6 @@ public class FunctionalTest {
 			.database(source.getDatabaseName())
 			.username(source.getUser())
 			.password(source.getPassword())
-			.validationQuery("SET TIMEZONE TO UTC")
 			.poolSize(100)
 			.build();
 	}

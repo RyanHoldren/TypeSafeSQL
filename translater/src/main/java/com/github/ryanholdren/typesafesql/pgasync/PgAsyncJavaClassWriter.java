@@ -17,7 +17,7 @@ public class PgAsyncJavaClassWriter extends JavaClassWriter {
 		action.accept("com.github.pgasync.QueryExecutor");
 		switch (sql.getNumberOfColumns()) {
 			case 0:
-				action.accept("static com.github.ryanholdren.typesafesql.RxJavaToReactor.toFlux");
+				action.accept("static com.github.ryanholdren.typesafesql.RxJavaToReactor.toMono");
 				action.accept("reactor.core.publisher.Mono");
 				action.accept("com.github.pgasync.ResultSet");
 				break;
@@ -107,7 +107,7 @@ public class PgAsyncJavaClassWriter extends JavaClassWriter {
 		if (sql.hasParameters()) {
 			switch (sql.getNumberOfColumns()) {
 				case 0:
-					writer.writeLine("return toFlux(executor.querySet(SQL, parameters)).then();");
+					writer.writeLine("return toMono(executor.querySet(SQL, parameters)).then();");
 					break;
 				case 1:
 					final ReturnFromRow extractor = new ReturnFromRow(writer);
@@ -124,7 +124,7 @@ public class PgAsyncJavaClassWriter extends JavaClassWriter {
 		} else {
 			switch (sql.getNumberOfColumns()) {
 				case 0:
-					writer.writeLine("return toFlux(executor.querySet(SQL)).then();");
+					writer.writeLine("return toMono(executor.querySet(SQL)).then();");
 					break;
 				case 1:
 					final ReturnFromRow extractor = new ReturnFromRow(writer);
